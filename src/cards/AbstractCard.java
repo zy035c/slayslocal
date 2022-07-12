@@ -25,10 +25,20 @@ public abstract class AbstractCard {
     public boolean freeToPlayOnce = false;
     public boolean isInAutoplay = false;
 
-    public int baseBlock = 0;
-    public int baseDamage = 0;
-    public int damage = 0;
-    public int block = 0;
+    // 定义各种牌会用到的基础数值。如果没有成功的初始化会等于-1
+    public int baseDamage = -1, baseBlock = -1,
+            baseMagicNumber = -1, baseHeal = -1,
+            baseDraw = -1, baseDiscard = -1;
+    public int damage = -1, block = -1,
+            magicNumber = -1, heal = -1,
+            draw = -1, discard = -1;
+
+    protected DamageInfo.DamageType damageType;
+    public DamageInfo.DamageType damageTypeForTurn;
+
+    public boolean inBottleFlame = false;
+    public boolean inBottleLightning = false;
+    public boolean inBottleTornado = false;
 
 
     public AbstractCard(String ID, String NAME, String IMG_PATH, int COST, String DESCRIPTION,
@@ -46,13 +56,17 @@ public abstract class AbstractCard {
         this.targetType = targetType;
         // this.damageType = dType;
         this.costForTurn = this.cost;
+
+
         this.damage = this.baseDamage;
         this.block = this.baseBlock;
     }
 
+
     public boolean canPlay(AbstractCard card) {
         return true; // ???
     }
+
 
     public boolean canUse(AbstractPlayer p, AbstractCreature m) {
         if (this.type == CardType.STATUS && costForTurn < -1 // Medical Kit?
@@ -164,6 +178,20 @@ public abstract class AbstractCard {
         return card;
     }
 
+    public void calculateCardDamage(AbstractCreature target) {
+        //
+
+    }
+
+    /******************************************************************************
+     *  以下是关于卡使用、打出、结束回合弃牌时的特殊情况。
+     *
+     ******************************************************************************/
+
+    public boolean retain = false; // 回合结束后是否保留
+    public boolean exhaust = false; // 打出后是否exhaust
+    public boolean selfRetain = false; // 不清楚是什么
+
     /******************************************************************************
      *  以下是关于upgrade的方法。
      *
@@ -247,11 +275,15 @@ public abstract class AbstractCard {
 
     /******************************************************************************
      *  结束。
-     *  以下是抽象方法。
+     *  以下是抽象方法 和等待继承的非抽象方法。
      ******************************************************************************/
     public abstract AbstractCard makeCopy(); // 抽象的方法
 
     public abstract void upgrade();
+
+    public void triggerOnEndOfPlayerTurn(){};
+
+    public void triggerOnManualDiscard(){};
 
     /******************************************************************************
      *  以下是枚举类。属性。
@@ -261,7 +293,7 @@ public abstract class AbstractCard {
     }
 
     public enum CardColor {
-        RED, BLUE, GREEN;
+        RED, BLUE, GREEN, COLORLESS;
     }
 
     public enum CardRarity {
