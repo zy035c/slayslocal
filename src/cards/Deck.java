@@ -2,16 +2,27 @@ package cards;
 
 import java.util.ArrayList;
 import java.util.*;
+
 import cards.common.*;
+import cards.red.Anger;
 import cards.red.Clash;
 
 public class Deck {
 
     public ArrayList<AbstractCard> deckCards = new ArrayList<AbstractCard>();;
 
+
+
+    public enum DECK_TYPE {
+        DRAW_PILE, DISCARD_PILE, HAND, MASTER_DECK, EXHAUST_PILE, LIMBO;
+    }
+    // LIMBO是回合结束后保留到下回合到牌的牌堆
+
+    public DECK_TYPE deck_type;
     // only strike and defense in the deck
-    public Deck() {
-        deckCards = new ArrayList<AbstractCard>();;
+    public Deck(DECK_TYPE deck_type) {
+        deckCards = new ArrayList<AbstractCard>();
+        this.deck_type = deck_type;
     }
 
     public Deck(ArrayList<String> list) {
@@ -27,6 +38,8 @@ public class Deck {
                 case "Clash":
                     this.addToTop(new Clash());
                     break;
+                case "Anger":
+                    this.addToTop(new Anger());
                 default:
             }
         }
@@ -38,7 +51,7 @@ public class Deck {
     }
 
     public void addToBottom(AbstractCard c) {
-        Deck nd = new Deck();
+        Deck nd = new Deck(this.deck_type);
         nd.addToTop(c);
         for (AbstractCard ca: this.deckCards) {
             nd.addToTop(ca);
@@ -56,12 +69,30 @@ public class Deck {
         return c;
     }
 
+    public AbstractCard getRandomCard() {
+        if (this.isEmpty()) {
+            return null;
+        }
+        Random rand = new Random();
+        // 随机数如果是nextInt(25)，0-24
+        return this.deckCards.get(rand.nextInt(size()));
+    }
+
+    public void removeCard(AbstractCard c) {
+        if (!this.deckCards.contains(c)) {
+            //...
+            System.out.println("Removing non-existing card "+c.NAME+ " from "+this.deck_type.toString());
+            return;
+        }
+        this.deckCards.remove(c);
+    }
+
     public void clear() {
         this.deckCards.clear();
     }
 
-    public Deck makecopy() {
-        Deck nd = new Deck();
+    public Deck makeCopy() {
+        Deck nd = new Deck(this.deck_type);
         for (AbstractCard c: deckCards) {
             nd.addToTop(c);
         }

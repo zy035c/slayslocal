@@ -9,6 +9,7 @@ import java.util.ArrayList;
  *  在队列中依次执行。一张卡引起的所有后续效果也是如此。
  ******************************************************************************/
 public class GameActionManager {
+
     public boolean turnHasEnded;
     public static int damageReceivedThisTurn;
     public static int damageReceivedThisCombat;
@@ -20,7 +21,8 @@ public class GameActionManager {
         this.phase = Phase.WAITING_ON_USER;
     }
 
-    // first top, last bottom
+    // old top, new bottom
+    // top的是后添加的，应该从bottom开始执行
     public void addToBottom(AbstractGameAction action) {
 
     }
@@ -29,13 +31,18 @@ public class GameActionManager {
         actions.add(action);
     }
 
-    // 结束回合，清空动作队列
+    // 结束回合
     public void endTurn() {
-        actions.clear();
-        this.phase = Phase.WAITING_ON_USER;
+        turnHasEnded = true;
+        // actions.clear();
+        // this.phase = Phase.WAITING_ON_USER;
     }
 
-    // 执行最上面的一个动作，然后根据是否还有动作未执行来set this.phase
+    public void startTurn() {
+        turnHasEnded = false;
+    }
+
+    // 执行最bottom的一个动作，然后根据是否还有动作未执行来set this.phase
     public void executeAction() {
 
         // if currentAction.isDone == true
@@ -45,8 +52,9 @@ public class GameActionManager {
             return;
         }
 
-        currentAction = actions.get(actions.size()-1);
+        currentAction = actions.get(0);
         currentAction.update();
+
         System.out.println("executeAction: " + currentAction.getClass().getSimpleName());
         actions.remove(currentAction);
 
@@ -60,6 +68,11 @@ public class GameActionManager {
 
     // 一直执行到清空队列为止
     public void emptyQueue() {
+        if (this.actions.isEmpty()) {
+            this.phase = Phase.WAITING_ON_USER;
+            return;
+        }
+        this.phase = Phase.WAITING_ON_USER;
         while (actions.size() > 0) {
             executeAction();
         }

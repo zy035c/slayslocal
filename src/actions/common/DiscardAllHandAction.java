@@ -25,8 +25,9 @@ public class DiscardAllHandAction extends AbstractGameAction {
             return;
         }
         for (AbstractCard c: p.hand.deckCards) {
-            p.moveToDiscardPile(c);
+            p.discardFromHand(c);
         }
+        // animation
         p.hand.clear();
         // AbstractGUI.reLayoutHand();
     }

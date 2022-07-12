@@ -1,5 +1,6 @@
 package actions;
 import cards.DamageInfo;
+import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
 import core.AbstractCreature;
 
@@ -16,7 +17,9 @@ public abstract class AbstractGameAction {
     public int amount;
     public ActionType actionType;
     public AbstractCreature source;
+    public AbstractPlayer p;
     public boolean endTurn = false;
+    public boolean isDone;
 
     protected void setValues(AbstractCreature target, AbstractCreature source, int amount) {
         this.target = target;

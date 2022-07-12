@@ -6,6 +6,7 @@ import core.AbstractCreature;
 import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
 
+// 弃掉打出的牌（而非从手牌中弃掉
 public class DiscardPlayAction extends AbstractGameAction {
     AbstractCard targetCard;
     AbstractPlayer source;
@@ -22,11 +23,12 @@ public class DiscardPlayAction extends AbstractGameAction {
     }
 
     public void update() {
-        if (source.hand.size() <= 0) {
+        if (targetCard == null) {
             return;
         }
         // animation
-        this.source.discardFromHand(targetCard);
+        this.source.moveToDiscardPile(targetCard);
+        // System.out.println("Just DiscardPlayAction, disc pile "+this.source.discardPile.size());
         // AbstractGUI.reLayoutHand();
     }
 

@@ -5,19 +5,19 @@ import cards.common.*;
 import core.AbstractCreature;
 
 import java.util.ArrayList;
-public class Player extends AbstractPlayer {
+public class TestPlayer2 extends AbstractPlayer {
 
-    // IRONCLAD
+    // SILENCE
     // private EnergyOrbInterface energyOrb = (EnergyOrbInterface)new EnergyOrbRed();
 
 
-    public Player(String name_) {
-        super(name_, 100, 10, 5);
+    public TestPlayer2(String name_) {
+        super(name_, 999, 10, 5);
         // 名字，最大生命值，手牌上限，每回合摸牌数
-        this.health = 100;
+        this.health = 999;
         this.energyCap = 3; // 能量上限
         initializeTestDeck();
-        initializeTestRings();
+        // initializeTestRings();
         this.energy = 0; // 暂时
     }
 

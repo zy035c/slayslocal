@@ -26,7 +26,7 @@ public abstract class AbstractDungeon {
     public static AbstractPlayer onStagePlayer;
     public static ArrayList<AbstractCreature> creature_list;
 
-    public AbstractDungeon(ArrayList<AbstractCreature> p_list) {
+    public AbstractDungeon(String name, ArrayList<AbstractCreature> p_list, SaveFile saveFile) {
         creature_list = p_list;
         for (AbstractCreature creature: creature_list) {
             if (creature.isPlayer) {
@@ -37,7 +37,11 @@ public abstract class AbstractDungeon {
         if (onStagePlayer == null) {
             System.out.println("WARNING! NO onStagePlayer.");
         }
-        actionManager = new GameActionManager();
+
+        AbstractDungeon.actionManager = new GameActionManager();
+        AbstractDungeon.name = name;
+
+
     }
 
     // 返回一个含有所有敌人（除去当前onStagePlayer）的列表

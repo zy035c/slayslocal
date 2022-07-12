@@ -1,11 +1,6 @@
 package core;
 
-import cards.AbstractCard;
 import cards.DamageInfo;
-import dungeons.AbstractDungeon;
-
-import java.util.ArrayList;
-import cards.Deck;
 
 /******************************************************************************
  *  所有游戏生物、玩家、npc的抽象父类，必须extend这个类，并且实现damage()方法。
@@ -80,5 +75,10 @@ public abstract class AbstractCreature {
     }
     public void loseBlock() {
         loseBlock(this.block);
+    }
+
+    // 还没有implement buffs
+    public boolean hasBuff(String buffName) {
+       return false;
     }
 }

@@ -1,7 +1,7 @@
-package core;
+package ui;
 
 import cards.AbstractCard;
-import dungeons.AbstractDungeon;
+import core.AbstractCreature;
 import dungeons.CustomFrame;
 import dungeons.CustomLabel;
 import dungeons.Exordium;
@@ -12,9 +12,9 @@ import java.util.ArrayList;
 
 public class GUI {
 
-    public boolean endTurn = false;
+    public boolean endTurn = false; // 没有什么用
 
-    private Exordium dungeon;
+    private Exordium dungeon; // 一个游戏场景的变量
 
     // static ArrayList<CustomLabel> labels; // 装目前场上显示的所有手牌的CustomLabel
     private JLabel healthBar;
@@ -31,6 +31,9 @@ public class GUI {
     /******************************************************************************
      *
      * 在这里定义角色的加载位置
+     * 比如说，有两个角色时摆放在屏幕的左和右
+     * 有三个时把第三个摆放在上方，第四个在下方
+     * 一种构想，还没有写完，目前只允许两个角色
      *
      ******************************************************************************/
     public final int[] GuiSetLayoutX = {80, 1100};
@@ -111,7 +114,7 @@ public class GUI {
         draw_pile.setOpaque(true);
         discard_pile.setOpaque(true);
         draw_pile.setBounds(70,720,70,110);
-        discard_pile.setBounds(CustomFrame.FRAME_WIDTH-70,720,70,110);
+        discard_pile.setBounds(CustomFrame.FRAME_WIDTH-140,720,70,110);
         draw_pile.setBackground(Color.YELLOW);
         discard_pile.setBackground(Color.YELLOW);
         draw_pile.setVerticalAlignment(JLabel.CENTER); // 排版
@@ -140,7 +143,7 @@ public class GUI {
         String discard = Integer.toString(this.dungeon.onStagePlayer.discardPile.size());
         this.draw_pile.setText(draw);
         this.discard_pile.setText(discard);
-        System.out.println("Done."+"Draw pile "+draw+" Discard pile "+discard+".");
+        System.out.println("Done. "+"Draw pile "+draw+" Discard pile "+discard+".");
     }
 
     /******************************************************************************
@@ -155,6 +158,7 @@ public class GUI {
         private JLabel blockBar;
         private JLabel image;
         private AbstractCreature c;
+        private JLabel healthBar;
 
         private static final int IMAGE_HEIGHT = 300;
         private static final int HP_BAR_WIDTH = 200;
@@ -188,8 +192,8 @@ public class GUI {
             image.setOpaque(true);
             image.setBackground(Color.pink);
             image.setBounds(posX, posY, 200, IMAGE_HEIGHT);
-            healthBar.setVerticalAlignment(JLabel.CENTER); // 排版
-            healthBar.setHorizontalAlignment(JLabel.LEFT);
+            image.setVerticalAlignment(JLabel.CENTER); // 排版
+            image.setHorizontalAlignment(JLabel.LEFT);
 
             this.frame.add(healthBar);
             this.frame.add(blockBar);
@@ -255,9 +259,10 @@ public class GUI {
 
     }
 
+
     public void updateCardDisplay() {
         clearCardDisplay();
-        int num = dungeon.onStagePlayer.hand.size();
+        int num = dungeon.onStagePlayer.hand.size(); // 获取当前场上player的手牌数量
         System.out.println("Updating screen card labels: "+num);
         int[] x_corr = new int[num];
         for (int i=0; i<num; i++) {

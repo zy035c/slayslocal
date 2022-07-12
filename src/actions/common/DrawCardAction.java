@@ -41,23 +41,24 @@ public class DrawCardAction extends AbstractGameAction{
             return;
         }
 
-        int deckSize = AbstractDungeon.onStagePlayer.drawPile.size();
+        int drawSize = AbstractDungeon.onStagePlayer.drawPile.size();
         int discardSize = AbstractDungeon.onStagePlayer.discardPile.size();
 
-        if (deckSize + discardSize <= 0) {
+        if (drawSize + discardSize <= 0) {
             // endActionWithFollowUp();
             return;
         }
 
-        if (AbstractDungeon.onStagePlayer.hand.size() == 10) {
+        if (AbstractDungeon.onStagePlayer.hand.size() == AbstractDungeon.onStagePlayer.hand_max) {
             // AbstractDungeon.onStagePlayer.createHandIsFullDialog();
             // endActionWithFollowUp();
+            // messagebox hand is full
             return;
         }
 
-        if (deckSize < amount) {
-            AbstractDungeon.onStagePlayer.reshuffle();
-        }
+        // 把是否需要洗牌的判断放到AbstractPlayer里面。
+        // 重新从外部添加洗牌action
+
         AbstractDungeon.onStagePlayer.draw(amount);
         // AbstractGUI.reLayoutHand();
 

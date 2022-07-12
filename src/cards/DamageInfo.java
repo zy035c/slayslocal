@@ -11,7 +11,7 @@ public class DamageInfo {
     public AbstractCreature owner;
     public String name;
     public DamageType type;
-    public int base; // 上海数量
+    public int base; // 伤害数量
     public int output; // 实际输出伤害
     public boolean isModified = false;
 

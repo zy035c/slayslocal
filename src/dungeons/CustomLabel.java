@@ -1,19 +1,14 @@
 package dungeons;
 
+import actions.GameActionManager;
 import cards.AbstractCard;
-import com.sun.management.VMOption;
-import core.AbstractPlayer;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import core.AbstractCreature;
-import core.AbstractPlayer;
-import cards.AbstractCard;
-import core.GUI;
-import javax.swing.border.Border;
+import ui.GUI;
 
 public class CustomLabel extends JLabel {
     private int originalX, originalY;
@@ -53,6 +48,8 @@ public class CustomLabel extends JLabel {
         originalX = x;
         originalY = y;
     }
+
+    // label的事件监听器
     public void addListener() {
 
         MouseAdapter mAdapter = new MouseAdapter() {
@@ -72,6 +69,8 @@ public class CustomLabel extends JLabel {
                 setBounds(getX()+e.getX()-50,getY()+e.getY()-50, CARD_WIDTH, CARD_HEIGHT);
             }
 
+
+            // 放开鼠标时进行判断
             public void mouseReleased(MouseEvent e) {
                 setBackground(new Color(0xd6d6d6));
 
@@ -88,6 +87,7 @@ public class CustomLabel extends JLabel {
                     default:
                         target = dungeon.onStagePlayer;
                 }
+                // 不同作用类型决定了这张卡应该被拖到什么地方才能生效，但是暂时没写
 
                 if (466 < getX() && getX() < 919 &&  151 < getY() && getY() < 604) {
                     if (card.canUse(dungeon.onStagePlayer, target)) {
@@ -104,6 +104,13 @@ public class CustomLabel extends JLabel {
                         // 采用新办法：update时清空所有卡label，重新从hand中读取创建
 
                         dungeon.playCard(card, target);
+
+                        // 等到动作队列全部结束后再update...
+                        while (true) {
+                            if (dungeon.actionManager.phase == GameActionManager.Phase.WAITING_ON_USER) {
+                                break;
+                            }
+                        }
                         gui.updateDungeonDisplay();
                         gui.updateCardDisplay();
 
