@@ -1,6 +1,5 @@
 package cards.common;
 import actions.AbstractGameAction;
-import actions.GameActionManager;
 import cards.AbstractCard;
 import core.AbstractCreature;
 import actions.common.GainBlockAction;
@@ -26,7 +25,7 @@ public class Defend extends AbstractCard{
     }
 
     public void use(AbstractPlayer p) {
-        AbstractGameAction action = (AbstractGameAction)new GainBlockAction((AbstractCreature)p, (AbstractCreature)p, this.baseBlock);
+        AbstractGameAction action = new GainBlockAction((AbstractCreature)p, (AbstractCreature)p, this.baseBlock);
         AbstractDungeon.actionManager.addToTop(action);
     }
 
@@ -38,7 +37,8 @@ public class Defend extends AbstractCard{
     public void upgrade() {
         if (!this.upgraded) {
             upgradeName();
-            upgradeDamage(UPGRADE_PLUS_BLOCK);
+            upgradeBlock(UPGRADE_PLUS_BLOCK);
+            System.out.println(this.NAME+" upgraded");
         }
     }
     public AbstractCard makeCopy() {

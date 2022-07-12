@@ -1,18 +1,20 @@
 package rings;
 
 import actions.AbstractGameAction;
-import actions.RelicAboveCreatureAction;
+import actions.common.RingAboveCreatureAction;
 import actions.common.DrawCardAction;
-import core.AbstractCreature;
 import dungeons.AbstractDungeon;
 
 public class Jormungandr extends AbstractRing {
+    public static final String name = "Jormungandr";
     public static final String ID = "Jormungandr";
     private boolean canDraw = false;
     private boolean disabledUntilEndOfTurn = false;
+    private String description = "Whenever you have no cards in hand during your turn, draw a card.";
 
     public Jormungandr() {
-        super("ID", "", RingTier.RARE, LandingSound.CLINK);
+        super(name,ID, "", RingTier.RARE, LandingSound.CLINK);
+        this.description = description;
     }
 
     public void atPreBattle() {
@@ -29,26 +31,21 @@ public class Jormungandr extends AbstractRing {
     }
 
     public void onRefreshHand() {
-        if (
-                AbstractDungeon.actionManager.actions.isEmpty() &&
-                        AbstractDungeon.onStagePlayer.hand.isEmpty() &&
-                        !AbstractDungeon.actionManager.turnHasEnded &&
-                        this.canDraw
+        // 其实不需要队列完毕后再执行。只需要依次往后排队就好。
+        if (AbstractDungeon.onStagePlayer.hand.isEmpty() &&
+                !AbstractDungeon.actionManager.turnHasEnded && // 如果不能摸牌或者回合已经结束，不要执行摸牌
+                this.canDraw
             // && !AbstractDungeon.onStagePlayer.hasPower("No Draw")
             // && !AbstractDungeon.isScreenUp
         ){
-            if (
-                    // (AbstractDungeon.getCurrRoom()).phase == AbstractRoom.RoomPhase.COMBAT
-                    // && !this.disabledUntilEndOfTurn &&
-                    (AbstractDungeon.onStagePlayer.discardPile.size() > 0 || AbstractDungeon.onStagePlayer.drawPile.size() > 0)) {
+            if ((AbstractDungeon.onStagePlayer.discardPile.size() > 0 || AbstractDungeon.onStagePlayer.drawPile.size() > 0)) {
                     // if ((AbstractDungeon.getCurrRoom()).phase == AbstractRoom.RoomPhase.COMBAT
                     // && !this.disabledUntilEndOfTurn
-                    // && (AbstractDungeon.player.discardPile.size() > 0 || AbstractDungeon.player.drawPile.size() > 0))
-
                 // flash();
+                System.out.println("Ring "+this.ID+" successfully activated onRefreshHand.");
 
                 // top first, bot last
-                AbstractGameAction act1 = new RelicAboveCreatureAction(AbstractDungeon.onStagePlayer, this);
+                AbstractGameAction act1 = new RingAboveCreatureAction(AbstractDungeon.onStagePlayer, this);
                 AbstractDungeon.actionManager.addToBottom(act1);
                 AbstractGameAction act2 = new DrawCardAction(AbstractDungeon.onStagePlayer, 1);
                 AbstractDungeon.actionManager.addToTop(act2);
