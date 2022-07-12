@@ -1,13 +1,11 @@
 package dungeons;
 
 import cards.AbstractCard;
-import core.AbstractCreature;
-import core.AbstractPlayer;
+import core.*;
 import actions.common.*;
 import java.util.ArrayList;
-import actions.GameActionManager;
-import core.GUI;
-import core.Player;
+
+import ui.GUI;
 
 /******************************************************************************
  *  当前的dungeon（游戏场景），叫做Exordium。
@@ -20,24 +18,28 @@ public class Exordium extends AbstractDungeon {
     // GameActionManager actionManager;
     // public Player onStagePlayer;
     public boolean need_update = false;
-    public ArrayList<Player> player_list = new ArrayList<>();
+    public ArrayList<AbstractPlayer> player_list = new ArrayList<>();
+    public static final String name = "Exordium";
 
     public Exordium(ArrayList<AbstractCreature> p_list) {
-        super(p_list);
+        super(name, p_list, new SaveFile());
         for (AbstractCreature p: p_list) {
-            this.player_list.add((Player) p);
+            this.player_list.add((AbstractPlayer) p);
         }
         //System.out.println("!need_update at constructor"+need_update);
     }
 
     public void init_dungeon() {
         System.out.println("Dungeon initialization starts.");
-        onStagePlayer = (Player) player_list.get(0);
+        // 把第一个玩家作为现在场上的
+        onStagePlayer = (AbstractPlayer) player_list.get(0);
         actionManager.addToTop(new GainBlockAction(player_list.get(1), 15));
-        onStagePlayer.drawPile = onStagePlayer.masterDeck.makecopy();
+        //
+        onStagePlayer.drawPile = onStagePlayer.masterDeck.makeCopy();
         onStagePlayer.drawPile.shuffle();
-        player_list.get(1).drawPile = player_list.get(1).masterDeck.makecopy();
+        player_list.get(1).drawPile = player_list.get(1).masterDeck.makeCopy();
         player_list.get(1).drawPile.shuffle();
+
         System.out.println("Dungeon initialization complete. Draw pile size is "
                 + onStagePlayer.drawPile.size());
     }
@@ -45,49 +47,49 @@ public class Exordium extends AbstractDungeon {
     public void start_turn() {
         System.out.println("Turn starts.");
         // deal cards
+        actionManager.startTurn();
         actionManager.addToTop(new DiscardAllHandAction(onStagePlayer));
-        actionManager.executeAction();
+        // actionManager.executeAction();
         actionManager.addToTop(new DrawCardAction(onStagePlayer, onStagePlayer.drawNumber, false));
 
         // recharge energy
         onStagePlayer.energy = 0;
         actionManager.addToTop(new GainEnergyAction(onStagePlayer.energyCap));
 
+        // if?
+        onStagePlayer.loseBlock();
+
+        // activate buffs and rings
+        onStagePlayer.atTurnStart();
+
         actionManager.emptyQueue();
         System.out.println("Turn start complete.");
     }
 
     public void playCard(AbstractCard card, AbstractCreature target) {
-        card.use(onStagePlayer, target);
-        actionManager.phase = GameActionManager.Phase.EXECUTING_ACTIONS;
-        // lose energy?
-        onStagePlayer.loseEnergy(card.costForTurn);
-        actionManager.addToTop(new DiscardPlayAction(card));
+        onStagePlayer.useCard(card, target, card.costForTurn);
         this.need_update = true;
         System.out.println("!need_update at playcard"+need_update);
-        actionManager.executeAction();
 
-        actionManager.emptyQueue();
     }
 
     public void end_turn() {
         System.out.println("Turn ends.");
-        // discard all cards
-        actionManager.addToTop(new DiscardAllHandAction(onStagePlayer));
-        actionManager.emptyQueue();
         actionManager.endTurn();
-        onStagePlayer.loseBlock();
+        // discard all cards
+        actionManager.addToTop(new DiscardAtEndOfTurnAction());
+        actionManager.emptyQueue();
 
         // shift player
-        onStagePlayer = (Player)getEnemies().get(getEnemies().size()-1);
+        onStagePlayer = (AbstractPlayer)getEnemies().get(getEnemies().size()-1);
         System.out.println("Turn end complete.");
     }
 
     public static void main (String[] args) {
 
         ArrayList<AbstractCreature> p_list = new ArrayList<>();
-        Player p1 = new Player("p1");
-        Player p2 = new Player("p2");
+        TestPlayer1 p1 = new TestPlayer1("p1");
+        TestPlayer2 p2 = new TestPlayer2("p2");
         p_list.add(p1);
         p_list.add(p2);
         Exordium dungeon = new Exordium(p_list);
@@ -98,7 +100,7 @@ public class Exordium extends AbstractDungeon {
         gui.updateDungeonDisplay();
 
         dungeon.start_turn();
-        dungeon.onStagePlayer.energy = 99;
+
         gui.updateDungeonDisplay();
         gui.updateCardDisplay();
 
