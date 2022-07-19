@@ -13,6 +13,12 @@ public class DamageAction extends AbstractGameAction {
         this.info = info;
         this.actionType = AbstractGameAction.ActionType.DAMAGE;
     }
+
+    public DamageAction(AbstractCreature target, DamageInfo info, AttackEffect attackEffect) {
+        this(target, info);
+        // 暂时不处理AttackEffect
+    }
+
     public void update() {
         this.target.damage(this.info);
     }

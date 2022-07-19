@@ -4,6 +4,7 @@ import cards.AbstractCard;
 import cards.Deck;
 import cards.colorless.Apotheosis;
 import cards.common.*;
+import cards.red.*;
 import cards.red.Anger;
 import cards.red.Clash;
 import core.AbstractCreature;
@@ -46,20 +47,18 @@ public class TestPlayer1 extends AbstractPlayer {
         // num = 13
         this.masterDeck.addToTop((AbstractCard)new Strike());
         this.masterDeck.addToTop((AbstractCard)new Strike());
-        this.masterDeck.addToTop((AbstractCard)new Strike());
-        this.masterDeck.addToTop((AbstractCard)new Strike());
-        this.masterDeck.addToTop((AbstractCard)new Defend());
-
-        this.masterDeck.addToTop((AbstractCard)new Defend());
         this.masterDeck.addToTop((AbstractCard)new Defend());
         this.masterDeck.addToTop((AbstractCard)new Defend());
         this.masterDeck.addToTop((AbstractCard)new Clash());
-        this.masterDeck.addToTop((AbstractCard)new Clash());
 
+        this.masterDeck.addToTop((AbstractCard)new Clash());
         this.masterDeck.addToTop((AbstractCard)new Anger());
         this.masterDeck.addToTop((AbstractCard)new Anger());
         this.masterDeck.addToTop((AbstractCard)new Apotheosis());
         this.masterDeck.addToTop((AbstractCard)new Apotheosis());
+
+        this.masterDeck.addToTop((AbstractCard)new Bash());
+        this.masterDeck.addToTop((AbstractCard)new Bash());
     }
 
 }

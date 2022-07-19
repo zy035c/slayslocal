@@ -78,7 +78,7 @@ public class Deck {
         return this.deckCards.get(rand.nextInt(size()));
     }
 
-    public void removeCard(AbstractCard c) {
+    public void removeSpecificCard(AbstractCard c) {
         if (!this.deckCards.contains(c)) {
             //...
             System.out.println("Removing non-existing card "+c.NAME+ " from "+this.deck_type.toString());

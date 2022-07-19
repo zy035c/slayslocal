@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 import actions.AbstractGameAction;
 import actions.common.DiscardPlayAction;
+import actions.common.ExhaustAction;
 import actions.common.ShuffleAction;
 import actions.common.UseCardAction;
 import cards.AbstractCard;
@@ -22,7 +23,7 @@ import rings.Jormungandr;
  *
  ******************************************************************************/
 
-public abstract class AbstractPlayer extends AbstractCreature{
+public abstract class AbstractPlayer extends AbstractCreature {
 
     public int energy = 0;
     public int energyCap;
@@ -116,27 +117,6 @@ public abstract class AbstractPlayer extends AbstractCreature{
      *
      ******************************************************************************/
 
-    // 把弃牌堆的牌shuffle并且作为新的摸牌堆
-    public void reshuffle() {
-        discardPile.shuffle();
-        while (discardPile.size() > 0) {
-            drawPile.addToTop(discardPile.drawFromTop());
-        }
-        System.out.println("Shuffle discard pile and put all into draw pile.");
-    }
-
-    // 把一张卡丢到弃牌堆顶
-    public void moveToDiscardPile(AbstractCard c) {
-        discardPile.addToTop(c);
-        this.onCardDrawOrDiscard();
-    }
-
-    // 把一张 特定的 卡从手牌丢到弃牌堆 "而不是打出卡"
-    public void discardFromHand(AbstractCard c) {
-        this.hand.removeCard(c);
-        this.onRefreshHand();
-        moveToDiscardPile(c); // 这个方法里含有this.onCardDrawOrDiscard()
-    }
 
     // 获得e点能量
     public void gainEnergy(int e) {
@@ -202,6 +182,11 @@ public abstract class AbstractPlayer extends AbstractCreature{
     //
     //
 
+    /******************************************************************************
+     *  以下是关于牌的一些方法
+     *
+     ******************************************************************************/
+
     // 多态，摸一张或者amount张
     public void draw() {
         draw(1);
@@ -221,13 +206,15 @@ public abstract class AbstractPlayer extends AbstractCreature{
         }
         // 摸牌堆没牌或者不够，洗牌
         if (this.drawPile.size() < amount || this.drawPile.size() <= 0) {
-            AbstractDungeon.actionManager.addToTop(new ShuffleAction(this));
+            AbstractDungeon.actionManager.addToBottom(new ShuffleAction(this));
+            AbstractDungeon.actionManager.executeAction();
         }
-
+        //
         for (int i = 0; i < amount; i++) {
+            // System.out.println("before drawPile.drawFromTop size "+drawPile.size());
             hand.addToTop(drawPile.drawFromTop());
-            this.onCardDrawOrDiscard();
-            this.onRefreshHand(); // 每摸一张牌，就触发一次？
+            this.onCardDrawOrDiscard(); // 每摸一张牌，就触发一次？
+            this.onRefreshHand();
         }
         // 如果摸完牌之后摸牌堆没牌，洗牌
         if (this.drawPile.size() <= 0 && !this.discardPile.isEmpty()) {
@@ -255,17 +242,47 @@ public abstract class AbstractPlayer extends AbstractCreature{
         c.use(this, target);
         AbstractDungeon.actionManager.addToTop(new UseCardAction(c, target));
 
-        this.hand.removeCard(c);
+        this.hand.removeSpecificCard(c);
         this.onRefreshHand();
 
         // exhaust, go to draw pile...
-
-        AbstractGameAction act = new DiscardPlayAction(c, target);
-        AbstractDungeon.actionManager.addToTop(act);
+        if (c.exhaust) {
+            AbstractDungeon.actionManager.addToTop(new ExhaustAction(c));
+        } else {
+            AbstractGameAction act = new DiscardPlayAction(c);
+            AbstractDungeon.actionManager.addToTop(act);
+        }
         // this.onCardDrawOrDiscard();
 
         // this.onRefreshHand(); // 必须在队列已经空了再执行？不再需要了。
         AbstractDungeon.actionManager.emptyQueue();
+    }
+
+    // 把弃牌堆的牌shuffle并且作为新的摸牌堆
+    public void reshuffle() {
+        discardPile.shuffle();
+        while (discardPile.size() > 0) {
+            drawPile.addToTop(discardPile.drawFromTop());
+        }
+        System.out.println("Shuffle discard pile and put all into draw pile.");
+    }
+
+    // 把一张卡放在弃牌堆顶
+    public void moveToDiscardPile(AbstractCard c) {
+        discardPile.addToTop(c);
+        this.onCardDrawOrDiscard();
+    }
+
+    // 把一张 特定的 卡从手牌丢到弃牌堆 "而不是打出卡"
+    public void discardFromHand(AbstractCard c) {
+        this.hand.removeSpecificCard(c);
+        this.onRefreshHand();
+        moveToDiscardPile(c); // 这个方法里含有this.onCardDrawOrDiscard()
+    }
+
+    public void exhaustCard(AbstractCard c) {
+        c.onExhaust();
+        exhaustPile.addToTop(c);
     }
 
     /******************************************************************************
@@ -323,5 +340,4 @@ public abstract class AbstractPlayer extends AbstractCreature{
         }
         // buff
     }
-
 }

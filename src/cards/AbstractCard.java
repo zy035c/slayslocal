@@ -57,19 +57,20 @@ public abstract class AbstractCard {
         // this.damageType = dType;
         this.costForTurn = this.cost;
 
-
-        this.damage = this.baseDamage;
-        this.block = this.baseBlock;
+        calculateDamage();
+        calculateBlock();
+        calculateMagicNumber();
     }
 
-
-    public boolean canPlay(AbstractCard card) {
-        return true; // ???
-    }
-
-
-    public boolean canUse(AbstractPlayer p, AbstractCreature m) {
-        if (this.type == CardType.STATUS && costForTurn < -1 // Medical Kit?
+    // 简单判断有无可能被打出
+    public boolean canPlay() {
+        for (AbstractCard c : AbstractDungeon.onStagePlayer.hand.deckCards) {
+            if (!c.canPlayAnotherCard(this)) {
+                return false;
+            }
+        }
+        // 状态和诅咒牌无法被打出
+        if (this.type == CardType.STATUS && this.costForTurn < -1 // Medical Kit?
         ) {
             return false;
         }
@@ -77,7 +78,15 @@ public abstract class AbstractCard {
         ) {
             return false;
         }
-        if (cardPlayable(m) && hasEnoughEnergy()) {
+
+        // power, relics
+
+        return hasEnoughEnergy();
+    }
+
+    // 能否对目标对象使用
+    public boolean canUse(AbstractPlayer p, AbstractCreature m) {
+        if (canPlay() && hasEnoughEnergy()) {
             return true;
         }
         return false;
@@ -101,14 +110,6 @@ public abstract class AbstractCard {
             return false;
         }
 
-        // power, relics
-
-        // for (AbstractCard c : AbstractDungeon.player.hand.group) {
-        ///* 1048 */       if (!c.canPlay(this)) {
-        ///* 1049 */         return false;
-        ///*      */       }
-        ///*      */     }
-
         if (AbstractDungeon.onStagePlayer.energy >= this.costForTurn || freeToPlay() || this.isInAutoplay) {
             return true;
         }
@@ -116,7 +117,7 @@ public abstract class AbstractCard {
     }
 
     // 返回能量花费的String
-    private String getCost() {
+    public String getCost() {
         if (this.cost == -1) {
             return "X";
         }
@@ -194,7 +195,7 @@ public abstract class AbstractCard {
 
     /******************************************************************************
      *  以下是关于upgrade的方法。
-     *
+     *  也关于数字结算
      ******************************************************************************/
     int timesUpgraded = 0;
     public boolean upgraded = false;
@@ -202,8 +203,26 @@ public abstract class AbstractCard {
     boolean isCostModified;
     boolean upgradedBlock = false;
     boolean upgradedDamage = false;
+    boolean upgradedMagicNumber = false;
     boolean isBlockModified;
     boolean isDamageModified;
+
+    public void calculateBlock() {
+        this.block = this.baseBlock;
+    }
+
+    public void calculateDamage() {
+        this.damage = this.baseDamage;
+    }
+
+    public void calculateMagicNumber() {
+        this.magicNumber = this.baseMagicNumber;
+    }
+
+    protected void upgradeMagicNumber(int amount) {
+        this.baseMagicNumber += amount;
+        this.upgradedMagicNumber = true;
+    }
 
     protected void upgradeDamage(int amount) {
         this.baseDamage += amount;
@@ -272,6 +291,32 @@ public abstract class AbstractCard {
 //        }
     }
 
+    // 直接获得descr
+    public String getDescription() {
+
+        calculateBlock();
+        calculateDamage();
+        calculateMagicNumber();
+
+        String descript = this.DESCRIPTION.replace(
+                "!DAMAGE!",
+                Integer.toString(this.damage)
+        );
+        descript = descript.replace(
+                "!BLOCK!",
+                Integer.toString(this.block)
+        );
+        descript = descript.replace(
+                "!MAGIC!",
+                Integer.toString(this.magicNumber)
+        );
+        return descript;
+    }
+
+    // 在选择了目标的时候获得descr
+    public String getDescriptionOnTarget(AbstractCreature target) {
+        return this.DESCRIPTION;
+    }
 
     /******************************************************************************
      *  结束。
@@ -285,11 +330,40 @@ public abstract class AbstractCard {
 
     public void triggerOnManualDiscard(){};
 
+    public void modifyCostForCombat(int i) {
+    }
+
+    // 有手上这张牌的时候，能否打出
+    // @param card 这张牌呢
+    // 等待override
+    public boolean canPlayAnotherCard(AbstractCard card) {
+        return true;
+    }
+
+    public void onExhaust() {}
+
     /******************************************************************************
      *  以下是枚举类。属性。
      ******************************************************************************/
     public enum CardType {
         ATTACK, SKILL, POWER, CURSE, STATUS;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case ATTACK:
+                    return "Attack";
+                case SKILL:
+                    return "Skill";
+                case POWER:
+                    return "Power";
+                case CURSE:
+                    return "Curse";
+                case STATUS:
+                    return "Status";
+            }
+            return "?Unknown";
+        }
     }
 
     public enum CardColor {

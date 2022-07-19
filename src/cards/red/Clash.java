@@ -11,7 +11,8 @@ import dungeons.AbstractDungeon;
 public class Clash extends AbstractCard {
     public static final String ID = "cards.red.Clash";
     public static final String NAME = "Clash";
-    public static final String DESCRIPTION = "Deal 14 damage.";
+    public static final String DESCRIPTION = "Can only be played if\n" +
+            "every card in your\nhand is an Attack.\nDeal !DAMAGE! damage.";
     public static final String IMG_PATH = "";
 
     private static final int COST = 0;
@@ -26,9 +27,10 @@ public class Clash extends AbstractCard {
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
+        calculateDamage();
         if (m != null) {
-            DamageInfo tempInfo = new DamageInfo((AbstractCreature) p, this.baseDamage, this.damageTypeForTurn);
-            AbstractDungeon.actionManager.addToTop((AbstractGameAction) new DamageAction((AbstractCreature) m, tempInfo));
+            DamageInfo tempInfo = new DamageInfo(p, this.damage, this.damageTypeForTurn);
+            AbstractDungeon.actionManager.addToTop(new DamageAction(m, tempInfo));
         }
     }
 

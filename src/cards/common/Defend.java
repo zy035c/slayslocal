@@ -9,7 +9,7 @@ import dungeons.AbstractDungeon;
 public class Defend extends AbstractCard{
     public static final String ID = "cards.common.Defend";
     public static final String NAME = "Defend";
-    public static final String DESCRIPTION = "Gain !D! block.";
+    public static final String DESCRIPTION = "Gain !BLOCK! block.";
     public static final String IMG_PATH = "";
 
     private static final int COST = 1;
@@ -25,7 +25,8 @@ public class Defend extends AbstractCard{
     }
 
     public void use(AbstractPlayer p) {
-        AbstractGameAction action = new GainBlockAction((AbstractCreature)p, (AbstractCreature)p, this.baseBlock);
+        calculateBlock();
+        AbstractGameAction action = new GainBlockAction((AbstractCreature)p, (AbstractCreature)p, this.block);
         AbstractDungeon.actionManager.addToTop(action);
     }
 

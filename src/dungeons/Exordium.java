@@ -5,10 +5,9 @@ import core.*;
 import actions.common.*;
 import java.util.ArrayList;
 
-import ui.GUI;
-
 /******************************************************************************
  *  当前的dungeon（游戏场景），叫做Exordium。
+ *
  *
  ******************************************************************************/
 
@@ -32,6 +31,11 @@ public class Exordium extends AbstractDungeon {
     public void init_dungeon() {
         System.out.println("Dungeon initialization starts.");
         // 把第一个玩家作为现在场上的
+        if (player_list.isEmpty()) {
+            System.out.println("Running test: no players");
+            return;
+        }
+
         onStagePlayer = (AbstractPlayer) player_list.get(0);
         actionManager.addToTop(new GainBlockAction(player_list.get(1), 15));
         //
@@ -48,8 +52,6 @@ public class Exordium extends AbstractDungeon {
         System.out.println("Turn starts.");
         // deal cards
         actionManager.startTurn();
-        actionManager.addToTop(new DiscardAllHandAction(onStagePlayer));
-        // actionManager.executeAction();
         actionManager.addToTop(new DrawCardAction(onStagePlayer, onStagePlayer.drawNumber, false));
 
         // recharge energy
@@ -66,11 +68,11 @@ public class Exordium extends AbstractDungeon {
         System.out.println("Turn start complete.");
     }
 
+    // 似乎没用上的方法
     public void playCard(AbstractCard card, AbstractCreature target) {
         onStagePlayer.useCard(card, target, card.costForTurn);
-        this.need_update = true;
-        System.out.println("!need_update at playcard"+need_update);
-
+        this.need_update = true; // 这个变量不起作用
+        // System.out.println("!need_update at playcard"+need_update);
     }
 
     public void end_turn() {
@@ -84,27 +86,5 @@ public class Exordium extends AbstractDungeon {
         onStagePlayer = (AbstractPlayer)getEnemies().get(getEnemies().size()-1);
         System.out.println("Turn end complete.");
     }
-
-    public static void main (String[] args) {
-
-        ArrayList<AbstractCreature> p_list = new ArrayList<>();
-        TestPlayer1 p1 = new TestPlayer1("p1");
-        TestPlayer2 p2 = new TestPlayer2("p2");
-        p_list.add(p1);
-        p_list.add(p2);
-        Exordium dungeon = new Exordium(p_list);
-        CustomFrame frame = new CustomFrame();
-        GUI gui = new GUI(frame, dungeon);
-
-        dungeon.init_dungeon();
-        gui.updateDungeonDisplay();
-
-        dungeon.start_turn();
-
-        gui.updateDungeonDisplay();
-        gui.updateCardDisplay();
-
-    }
-
 
 }

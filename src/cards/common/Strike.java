@@ -12,7 +12,7 @@ public class Strike extends AbstractCard {
 
     public static final String ID = "cards.common.Strike";
     public static final String NAME = "Strike";
-    public static final String DESCRIPTION = "Deal !D! damage.";
+    public static final String DESCRIPTION = "Deal !DAMAGE! damage.";
     public static final String IMG_PATH = "";
 
     private static final int COST = 1;
@@ -30,7 +30,8 @@ public class Strike extends AbstractCard {
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
-        DamageInfo tempInfo = new DamageInfo((AbstractCreature)p, this.baseDamage, this.damageTypeForTurn);
+        calculateDamage();
+        DamageInfo tempInfo = new DamageInfo((AbstractCreature)p, this.damage, this.damageTypeForTurn);
         AbstractDungeon.actionManager.addToTop((AbstractGameAction)new DamageAction((AbstractCreature)m, tempInfo));
     }
 

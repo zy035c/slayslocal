@@ -57,6 +57,9 @@ public abstract class AbstractDungeon {
 
     // 查看是否所有敌人已经死亡
     public static boolean areEnemiesBasicallyDead() {
+        if (getEnemies() == null) {
+            return true;
+        }
         for (AbstractCreature c: getEnemies()) {
             if (!c.isDead && !c.isDying) {
                 return false;

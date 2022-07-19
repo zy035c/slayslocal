@@ -1,4 +1,5 @@
 package actions;
+import dungeons.AbstractDungeon;
 import java.util.ArrayList;
 
 /******************************************************************************
@@ -22,12 +23,15 @@ public class GameActionManager {
     }
 
     // old top, new bottom
-    // top的是后添加的，应该从bottom开始执行
+    // top的是后添加的，执行时先从bottom开始执行
+    // 插队结算
     public void addToBottom(AbstractGameAction action) {
-
+        actions.add(0, action);
     }
 
+    // 排队依次结算
     public void addToTop(AbstractGameAction action) {
+        System.out.println("Adding action: "+action.getClass().getSimpleName());
         actions.add(action);
     }
 
@@ -51,12 +55,10 @@ public class GameActionManager {
             this.phase = Phase.WAITING_ON_USER;
             return;
         }
-
         currentAction = actions.get(0);
-        currentAction.update();
-
         System.out.println("executeAction: " + currentAction.getClass().getSimpleName());
-        actions.remove(currentAction);
+        currentAction.update();
+        actions.remove(0);
 
         if (actions.size() <= 0) {
             this.phase = Phase.WAITING_ON_USER;
@@ -76,6 +78,13 @@ public class GameActionManager {
         while (actions.size() > 0) {
             executeAction();
         }
+    }
+
+    // 插队。临时插入一个action并执行。
+    // 其实也写成：
+    public void queueJump(AbstractGameAction action) {
+        AbstractDungeon.actionManager.addToBottom(action);
+        AbstractDungeon.actionManager.executeAction();
     }
 
     public enum Phase {

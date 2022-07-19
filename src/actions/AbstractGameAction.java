@@ -20,6 +20,7 @@ public abstract class AbstractGameAction {
     public AbstractPlayer p;
     public boolean endTurn = false;
     public boolean isDone;
+    public AttackEffect attackEffect;
 
     protected void setValues(AbstractCreature target, AbstractCreature source, int amount) {
         this.target = target;

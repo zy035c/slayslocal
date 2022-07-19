@@ -1,9 +1,11 @@
+//package ui;
+//
 //import cards.AbstractCard;
 //import core.AbstractCreature;
 //import core.AbstractPlayer;
 //import dungeons.AbstractDungeon;
-//import dungeons.CustomFrame;
-//import dungeons.CustomLabel;
+//import ui.window.CustomFrame;
+//import ui.newwindow.CustomLabel;
 //
 //import javax.swing.*;
 //import java.awt.*;

@@ -22,14 +22,11 @@ public class UseCardAction extends AbstractGameAction {
 //            this.exhaustCard = true;
 //        }
 
-        setValues((AbstractCreature)AbstractDungeon.onStagePlayer, null, 1);
+        setValues(target, AbstractDungeon.onStagePlayer, 1);
     }
 
-    // self discard
     public void update() {
         this.targetCard.freeToPlayOnce = false;
         this.targetCard.isInAutoplay = false;
-
-
     }
 }

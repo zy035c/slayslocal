@@ -60,8 +60,8 @@ public class DrawCardAction extends AbstractGameAction{
         // 重新从外部添加洗牌action
 
         AbstractDungeon.onStagePlayer.draw(amount);
+        isDone = true;
         // AbstractGUI.reLayoutHand();
-
     }
 
 }

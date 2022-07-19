@@ -1,6 +1,9 @@
 package core;
 
+import buff.AbstractBuff;
 import cards.DamageInfo;
+
+import java.util.ArrayList;
 
 /******************************************************************************
  *  所有游戏生物、玩家、npc的抽象父类，必须extend这个类，并且实现damage()方法。
@@ -17,6 +20,8 @@ public abstract class AbstractCreature {
     public boolean isDead = false;
     public boolean isPlayer = false;
     public String name;
+
+
     public void addBlock(int amount) {
         // buffs and relics
         block += amount;
@@ -80,5 +85,21 @@ public abstract class AbstractCreature {
     // 还没有implement buffs
     public boolean hasBuff(String buffName) {
        return false;
+    }
+
+    public boolean isDeadOrEscaped() {
+        if (this.isDying || this.isDead) {
+            return true;
+        }
+        return false;
+    }
+
+    /******************************************************************************
+     *  以下是关于Buff的code
+     ******************************************************************************/
+    public ArrayList<AbstractBuff> buffs = new ArrayList<>();
+
+    public AbstractBuff getBuff(String buff_name) {
+        return null;
     }
 }
