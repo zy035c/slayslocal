@@ -1,1 +1,1 @@
-Run main method in src.dungeon.Exordium
+Run main method in DarkSlay.java
