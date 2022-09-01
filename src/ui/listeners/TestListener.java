@@ -1,15 +1,5 @@
 package ui.listeners;
 
-import actions.GameActionManager;
-import cards.AbstractCard;
-import core.AbstractCreature;
-import dungeons.AbstractDungeon;
-import dungeons.DungeonScene;
-import ui.CardPane;
-import ui.CreatureGUI;
-import ui.CustomLabel;
-import ui.GameColors;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

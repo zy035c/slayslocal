@@ -1,46 +1,18 @@
 package actions.common;
 
 
-import buff.AbstractBuff;
+import buffs.AbstractBuff;
 import actions.AbstractGameAction;
-import cards.AbstractCard;
 import core.AbstractCreature;
+import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
-
-import java.util.Collections;
 
 public class ApplyBuffAction extends AbstractGameAction {
     private AbstractBuff buffToApply;
 
     public ApplyBuffAction(AbstractCreature target, AbstractCreature source, AbstractBuff buffToApply, int stackAmount, boolean isFast, AbstractGameAction.AttackEffect effect) {
-
         setValues(target, source, stackAmount);
         this.buffToApply = buffToApply;
-
-//        if (AbstractDungeon.onStagePlayer.hasRelic("Snake Skull") && source != null && source.isPlayer && target != source && buffToApply.ID.equals("Poison")) {
-//            AbstractDungeon.onStagePlayer.getRelic("Snake Skull").flash();
-//            this.buffToApply.amount++;
-//            this.amount++;
-//        }
-        if (buffToApply.ID.equals("Corruption")) {
-            for (AbstractCard c : AbstractDungeon.onStagePlayer.hand.deckCards) {
-                if (c.type == AbstractCard.CardType.SKILL)
-                    c.modifyCostForCombat(-9);
-            }
-            for (AbstractCard c : AbstractDungeon.onStagePlayer.drawPile.deckCards) {
-                if (c.type == AbstractCard.CardType.SKILL)
-                    c.modifyCostForCombat(-9);
-            }
-            for (AbstractCard c : AbstractDungeon.onStagePlayer.discardPile.deckCards) {
-                if (c.type == AbstractCard.CardType.SKILL)
-                    c.modifyCostForCombat(-9);
-            }
-            for (AbstractCard c : AbstractDungeon.onStagePlayer.exhaustPile.deckCards) {
-                if (c.type == AbstractCard.CardType.SKILL) {
-                    c.modifyCostForCombat(-9);
-                }
-            }
-        }
         this.actionType = AbstractGameAction.ActionType.POWER;
         this.attackEffect = effect;
         if (AbstractDungeon.areEnemiesBasicallyDead()) {
@@ -53,7 +25,7 @@ public class ApplyBuffAction extends AbstractGameAction {
     }
 
     public ApplyBuffAction(AbstractCreature target, AbstractCreature source, AbstractBuff buffToApply) {
-        this(target, source, buffToApply, buffToApply.amount);
+        this(target, source, buffToApply, buffToApply.stack);
     }
 
     public ApplyBuffAction(AbstractCreature target, AbstractCreature source, AbstractBuff buffToApply, int stackAmount) {
@@ -70,74 +42,60 @@ public class ApplyBuffAction extends AbstractGameAction {
     //
     //
     public void update() {
+
+        boolean take_effect = false;
+        // 目标为空，不生效
         if (this.target == null || this.target.isDeadOrEscaped()) {
             this.isDone = true;
             return;
         }
 
-        if (this.buffToApply instanceof buff.NoDrawBuff && this.target.hasBuff(this.buffToApply.ID)) {
-            this.isDone = true;
-            return;
-        }
-
+        // 触发上buff来源的所有buff，看看有无可能发生什么
         if (this.source != null) {
             for (AbstractBuff buff : this.source.buffs) {
                 buff.onApplyBuff(this.buffToApply, this.target, this.source);
             }
         }
 
-        // Whenever you apply Vulnerable, also apply 1 Weak.
-        if (AbstractDungeon.onStagePlayer.hasRing("Overlord Ring") &&
-                this.source != null && this.source.isPlayer &&
-                this.target != this.source &&
-                this.buffToApply.ID.equals("Vulnerable") &&
-                !this.target.hasBuff("Pulp")) {
-            AbstractDungeon.onStagePlayer.getRing("Champion Belt").onTrigger(this.target);
-        }
-
-        if (// this.target instanceof AbstractMonster &&
-                this.target.isDeadOrEscaped()) {
-            this.isDone = true;
+        // 如果有pulp，并且此buff可以被取消：抵消这次上buff
+        if (this.target.hasBuff("Pulp") &&
+            this.buffToApply.cancellable) {
+            // addToTop((AbstractGameAction) new TextAboveCreatureAction(this.target, TEXT[0]));
+            // animation & sound
+            this.target.getBuff("Pulp").onSpecificTrigger();
+            take_effect = false;
             return;
         }
 
         // Relic: Ginger
         // Relic: Turnip
 
-        //
-        if (this.target.hasBuff("Pulp") &&
-                this.buffToApply.type == AbstractBuff.BuffType.DEBUFF) {
-            // addToTop((AbstractGameAction) new TextAboveCreatureAction(this.target, TEXT[0]));
-            // animation & sound
-            this.target.getBuff("Pulp").onSpecificTrigger();
-            return;
-        }
-
         boolean hasBuffAlready = false;
-        for (AbstractBuff b : this.target.buffs) {
+        for (AbstractBuff b : this.target.buffs) { // 如果已经有这个buff了：叠层
             if (b.ID.equals(this.buffToApply.ID)) { // && Night Terror
-                b.stackPower(this.amount);
-                // b.flash();
-
-                // if amount <= 0 ...
-                // if amount > 0 ...
-
+                if (b.stackable) { // 如果此buff不可叠层：不增加更多，但是仍然视为上了
+                    if (this.amount > 0) {
+                        b.incrementStack(amount);
+                    } else {
+                        b.decrementStack(amount);
+                    }
+                    // b.flash();
+                }
                 hasBuffAlready = true;
+                take_effect = true;
+                break;
                 // AbstractDungeon.onModifyPower();
             }
         }
 
-        if (this.buffToApply.type == AbstractBuff.BuffType.DEBUFF) {
-            // this.target.useFastShakeAnimation(0.5F);
-        }
-
         if (!hasBuffAlready) {
             this.target.buffs.add(this.buffToApply);
-            Collections.sort(this.target.buffs);
+            // Collections.sort(this.target.buffs); ?
             this.buffToApply.onInitialApplication();
             // this.buffToApply.flash();
             // AbstractDungeon.onModifyPower();
-
+            take_effect = true;
+            // 解锁成就
             if (this.target.isPlayer) {
                 int buffCount = 0;
                 for (AbstractBuff p : this.target.buffs) {
@@ -150,6 +108,24 @@ public class ApplyBuffAction extends AbstractGameAction {
                 }
             }
         }
+
+        if (this.buffToApply.type == AbstractBuff.BuffType.DEBUFF && take_effect) {
+            // this.target.useFastShakeAnimation(0.5F);
+        }
+
+        if (this.source != null && this.source.isPlayer) {
+            AbstractPlayer owner = (AbstractPlayer) this.source;
+            // Whenever you apply Compromise, also apply 1 Weak.
+            if (owner.hasRing("Overlord Ring") &&
+                this.source.isPlayer &&
+                this.target != owner &&
+                this.buffToApply.ID.equals("Compromise") &&
+                take_effect) {
+                AbstractDungeon.onStagePlayer.getRing("Overlord Ring").onTrigger(this.target);
+            }
+        }
+
+
     }
 }
 

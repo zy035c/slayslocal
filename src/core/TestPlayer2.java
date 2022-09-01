@@ -1,8 +1,10 @@
 package core;
 
-import cards.Deck;
+import cards.AbstractCard;
+import cards.colorless.Apotheosis;
 import cards.common.*;
-import core.AbstractCreature;
+import cards.red.*;
+import cards.green.*;
 
 import java.util.ArrayList;
 public class TestPlayer2 extends AbstractPlayer {
@@ -35,6 +37,28 @@ public class TestPlayer2 extends AbstractPlayer {
         retVal.add("Defend");
         retVal.add("Defend");
         return retVal;
+    }
+
+    @Override
+    public void initializeTestDeck() {
+        // num = 11
+        this.masterDeck.addToTop((AbstractCard)new Strike());
+        this.masterDeck.addToTop((AbstractCard)new Defend());
+        this.masterDeck.addToTop((AbstractCard)new Clash());
+        this.masterDeck.addToTop((AbstractCard)new Apotheosis());
+        this.masterDeck.addToTop((AbstractCard)new Bash());
+
+        this.masterDeck.addToTop((AbstractCard)new Bash());
+        this.masterDeck.addToTop((AbstractCard)new Dash());
+        this.masterDeck.addToTop((AbstractCard)new Dash());
+        this.masterDeck.addToTop((AbstractCard)new EscapePlan());
+        this.masterDeck.addToTop((AbstractCard)new EscapePlan());
+
+        this.masterDeck.addToTop((AbstractCard)new Apotheosis());
+        this.masterDeck.addToTop((AbstractCard)new BodySlam());
+        this.masterDeck.addToTop((AbstractCard)new BodySlam());
+        this.masterDeck.addToTop((AbstractCard)new Inflame());
+        this.masterDeck.addToTop((AbstractCard)new Inflame());
     }
 
 }

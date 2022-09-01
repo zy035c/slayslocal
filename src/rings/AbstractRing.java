@@ -5,6 +5,7 @@ import actions.common.UseCardAction;
 import cards.AbstractCard;
 import cards.DamageInfo;
 import core.AbstractCreature;
+import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
 import localization.RingStrings;
 import ui.campfire.AbstractCampfireOption;
@@ -23,10 +24,15 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
     public boolean energyBased = false;
     public boolean usedUp = false;
     public boolean grayscale = false;
-    public String description;
+    public boolean countable = false;
+
+    public String description = "";
     public String flavorText = "missing";
     public int cost;
     public int counter = -1;
+
+    public AbstractPlayer owner;
+
     public static final String IMG_DIR = "images/relics/";
     public static final String OUTLINE_DIR = "images/relics/outline/";
     private static final String L_IMG_DIR = "images/largeRelics/";
@@ -41,15 +47,14 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
     public float targetY;
     public boolean isSeen = false;
     public RingTier tier;
+    public boolean modifyDamageReceive = false;
     LandingSound landingSFX;
     public boolean isDone = false;
     public boolean isAnimating = false;
     public boolean isObtained = false;
-    private static final float OBTAIN_SPEED = 6.0F;
-    private static final float OBTAIN_THRESHOLD = 0.5F;
-    private float rotation = 0.0F;
     public boolean discarded = false;
     private String assetURL;
+
     public enum LandingSound {
         CLINK, FLAT, HEAVY, MAGICAL, SOLID;
     }
@@ -58,22 +63,26 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
         DEPRECATED, STARTER, COMMON, UNCOMMON, RARE, SPECIAL, BOSS, SHOP;
     }
 
-    public AbstractRing(String name, String setId, String imgName, RingTier tier, LandingSound sfx) {
+    public AbstractRing(String name, String setId, String description,
+                        String imgName, RingTier tier, AbstractPlayer owner, LandingSound sfx) {
         this.name = name;
         this.ringId = setId;
         this.ringStrings = RingStrings.getRingStrings(this.ringId);
+        this.description = description;
         // 没有意义的空架子 localization暂时为了不报错而建
         // for change language
         // this.DESCRIPTIONS = this.ringStrings.DESCRIPTIONS;
         this.imgUrl = imgName;
 
         // this.name = this.ringStrings.NAME;
-        this.description = getUpdatedDescription();
+        // this.description = getUpdatedDescription();
         this.flavorText = this.ringStrings.FLAVOR; // 没用
         this.tier = tier;
+        this.owner = owner;
         this.landingSFX = sfx;
         this.assetURL = "images/relics/" + imgName;
         // initializeTips();
+
     }
 
     public void usedUp() {
@@ -83,6 +92,19 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
 //        this.tips.clear();
 //        this.tips.add(new PowerTip(this.name, this.description));
         // initializeTips();
+    }
+
+    public String getAmountString() {
+        if (!countable) {
+            return "";
+        }
+        return Integer.toString(this.counter);
+    }
+
+    public String getDescription() {
+        String dsc = this.description;
+        // ...
+        return dsc;
     }
 
 //    public void spawn(float x, float y) {
@@ -440,6 +462,9 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
     public void atTurnStart() {
     }
 
+    public void onObtain() {
+    }
+
     public void atTurnStartPostDraw() {
     }
 
@@ -522,6 +547,7 @@ public abstract class AbstractRing implements Comparable<AbstractRing> {
     public float atDamageModify(float damage, AbstractCard c) {
         return damage;
     }
+    public int atDamageReceive(DamageInfo info, int damageAmount) {return -1;}
     public int changeNumberOfCardsInReward(int numberOfCards) {
         return numberOfCards;
     }

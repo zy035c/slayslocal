@@ -20,15 +20,15 @@ public class Anger extends AbstractCard {
     private static final int COST = 0;
     private static final int ATTACK_DMG = 6;
     private static final int UPGRADE_DMG = 4;
-    private DamageInfo.DamageType damageTypeForTurn;
     public Anger() {
         super(ID, NAME, IMG_PATH, COST, DESCRIPTION, CardType.ATTACK,
                 CardColor.RED, CardRarity.COMMON, CardTarget.SINGLE);
         this.baseDamage = ATTACK_DMG;
+        this.damageTypeForTurn = DamageInfo.DamageType.NORMAL;
     }
 
     public void use(AbstractPlayer p, AbstractCreature c) {
-        calculateDamage();
+        // calculateDamage();
         AbstractGameAction action = new DamageAction(c, new DamageInfo(p, this.damage, this.damageTypeForTurn));
         AbstractDungeon.actionManager.addToTop(action);
         AbstractDungeon.actionManager.addToTop(new MakeTempCardInDiscardAction(makeStatEquivalentCopy(), 1));

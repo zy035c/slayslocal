@@ -27,7 +27,7 @@ public class Armaments extends AbstractCard {
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
-        calculateBlock();
+        // calculateBlock();
         AbstractGameAction act = new GainBlockAction(p, p, this.block);
         AbstractDungeon.actionManager.addToTop(act);
         AbstractDungeon.actionManager.addToTop(new ArmamentsAction(this.upgraded));

@@ -17,7 +17,6 @@ public class Clash extends AbstractCard {
 
     private static final int COST = 0;
     private static final int ATTACK_DMG = 14;
-    private DamageInfo.DamageType damageTypeForTurn;
 
     public Clash() {
         super(ID, NAME, IMG_PATH, COST, DESCRIPTION,
@@ -27,7 +26,7 @@ public class Clash extends AbstractCard {
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
-        calculateDamage();
+        // calculateDamage();
         if (m != null) {
             DamageInfo tempInfo = new DamageInfo(p, this.damage, this.damageTypeForTurn);
             AbstractDungeon.actionManager.addToTop(new DamageAction(m, tempInfo));

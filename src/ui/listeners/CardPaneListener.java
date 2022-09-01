@@ -4,11 +4,9 @@ import actions.GameActionManager;
 import cards.AbstractCard;
 import core.AbstractCreature;
 import dungeons.AbstractDungeon;
-import dungeons.DungeonScene;
+import core.DungeonScene;
 import ui.CardPane;
 import ui.CreatureGUI;
-import ui.CustomLabel;
-import ui.GameColors;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -27,16 +25,26 @@ public class CardPaneListener extends MouseAdapter {
 
     @Override
     public void mouseDragged(MouseEvent evt) {
+
         // System.out.println("dragging");
         pane.moveTo(
                 pane.getX() + evt.getX() - 50,
                 pane.getY() + evt.getY() - 50
         );
-//        if (this.scene.onSomeCreature(pane) || pane.onSelfPlayArea()) {
-//            pane.setBackground(GameColors.green2);
-//        } else {
-//            pane.setBackground(GameColors.green1);
-//        }
+        boolean onCard = false;
+        for (CreatureGUI cgui: scene.GuiSets) {
+            if (cgui.cardOnCreature(pane) && cgui.getCreature() != AbstractDungeon.onStagePlayer) {
+                onCard = true;
+                pane.updateDescriptOnTarget(
+                        AbstractDungeon.onStagePlayer, // 拖动打牌时：必定在回合内？
+                        cgui.getCreature());
+            }
+        }
+        if (!onCard) {
+            pane.updateDescription(AbstractDungeon.onStagePlayer);
+            // 拖动离开目标之后恢复原来的伤害数值（1.5易伤倍率之前的）
+        }
+        pane.repaint();
     }
 
     // 松开鼠标时判断
@@ -62,12 +70,19 @@ public class CardPaneListener extends MouseAdapter {
             }
         }
 
+        if (pane.card.targetType == AbstractCard.CardTarget.ALL) {
+            if (pane.onSelfPlayArea()) {
+                tryPlayCard(AbstractDungeon.getEnemies().get(0));
+                return;
+            }
+        }
+
         pane.moveBack();
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        pane.updateDisplay();
+        pane.updateDisplayInTurn(AbstractDungeon.onStagePlayer); // ...暂时
     }
 
     @Override
@@ -89,7 +104,6 @@ public class CardPaneListener extends MouseAdapter {
             // gui.labels.remove(myself); // remove this CustomLabel from GUI's labels
             // 采用新办法：update时清空所有卡label，重新从hand中读取创建
             // 因此不需要remove了！
-
             AbstractDungeon.onStagePlayer.useCard(pane.card, target, pane.card.costForTurn);
 
             // 等到动作队列全部结束后再update...
@@ -99,7 +113,7 @@ public class CardPaneListener extends MouseAdapter {
                 }
             }
             scene.updateDungeonDisplay();
-            scene.updateCardDisplay();
+            scene.updateCardDisplay(true, true);
 
             return;
         } else {

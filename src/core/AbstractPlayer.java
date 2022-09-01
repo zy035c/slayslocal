@@ -2,10 +2,8 @@ package core;
 import java.util.ArrayList;
 
 import actions.AbstractGameAction;
-import actions.common.DiscardPlayAction;
-import actions.common.ExhaustAction;
-import actions.common.ShuffleAction;
-import actions.common.UseCardAction;
+import actions.common.*;
+import buffs.AbstractBuff;
 import cards.AbstractCard;
 import cards.DamageInfo;
 import cards.common.*;
@@ -15,7 +13,6 @@ import cards.Deck;
 import cards.red.Clash;
 import dungeons.AbstractDungeon;
 import rings.AbstractRing;
-import rings.Jormungandr;
 
 /******************************************************************************
  *  所有游戏玩家角色class的抽象父类，必须extend这个类。
@@ -108,16 +105,49 @@ public abstract class AbstractPlayer extends AbstractCreature {
         this.masterDeck.addToTop((AbstractCard)new Defend());
     }
 
-    public void initializeTestRings() {
-        this.rings.add(new Jormungandr());
+    /******************************************************************************
+     *  关于回合的方法
+     ******************************************************************************/
+
+    public int turn_num = 0; // 第几回合
+
+    public int drawNumberForTurn = -1;
+    public int energyRechargeForTurn = -1;
+    public void getDrawNumber() {
+        // buff, ring...
+        drawNumberForTurn = this.drawNumber; // 本回合摸牌数
+    }
+
+    public void getEnergyRechargeNumber() {
+        energyRechargeForTurn = this.energyCap; // 本回合获得能量数
+    }
+
+    public void startTurn() {
+        turn_num++;
+        atTurnStart(); // activate buffs and rings
+        getDrawNumber();
+        getEnergyRechargeNumber();
+        AbstractDungeon.actionManager.addToTop(new DrawCardAction(this, drawNumberForTurn, false));
+        AbstractDungeon.actionManager.addToTop(new GainEnergyAction(energyRechargeForTurn)); // recharge energy
+        this.loseBlock(); // reset block value
+        AbstractDungeon.actionManager.emptyQueue();
+    }
+
+
+    public void endTurn() {
+        atTurnEnd(); // activate buffs and rings
+        AbstractDungeon.actionManager.addToTop(new DiscardAtEndOfTurnAction()); // discard all cards
+        loseEnergyAtTurnEnd();
+        AbstractDungeon.actionManager.emptyQueue();
+    }
+
+    public void loseEnergyAtTurnEnd() {
+        this.energy = 0;
     }
 
     /******************************************************************************
-     *  测试方法们结束。
-     *
+     *  关于改变属性的方法
      ******************************************************************************/
-
-
     // 获得e点能量
     public void gainEnergy(int e) {
         this.energy += e;
@@ -132,23 +162,42 @@ public abstract class AbstractPlayer extends AbstractCreature {
                 +" Now "+this.energy+" energy.");
     }
 
-    // 接受伤害
-    public void damage(DamageInfo info) {
+    public void heal(int healAmount) {
+    }
+
+    //
+    //
+    //
+
+    // 接受伤害，暂时不override
+
+    @Override
+    public int calculateDamageReceive(DamageInfo info) {
         int damageAmount = info.output;
+        if (damageAmount < 0) {
+            damageAmount = 0;
+        }
+        for (AbstractBuff buff: this.buffs) {
+            if (buff.modifyDamageReceive) {
+                damageAmount = buff.atDamageReceive(info, damageAmount);
+            }
+        }
+        for (AbstractRing ring: this.rings) {
+            if (ring.modifyDamageReceive) {
+                damageAmount = ring.atDamageReceive(info, damageAmount);
+            }
+        }
+        return damageAmount;
+    }
+
+    @Override
+    public void damage(DamageInfo info) {
         boolean hadBlock = true;
         if (this.block == 0) {
             hadBlock = false;
         }
-        if (damageAmount < 0) {
-            damageAmount = 0;
-        }
-
-//      if (damageAmount > 1 && hasPower("IntangiblePlayer")) {
-//          damageAmount = 1;
-//      }
+        int damageAmount = calculateDamageReceive(info); // for relics and buffs to take effect
         damageAmount = decrementBlock(info, damageAmount); // decrementBlock来自父类
-
-        // for relics and buffs to take affect
 
         GameActionManager.damageReceivedThisTurn += damageAmount;
         GameActionManager.damageReceivedThisCombat += damageAmount;
@@ -173,36 +222,28 @@ public abstract class AbstractPlayer extends AbstractCreature {
             this.isDead = true;
             // AbstractGUI.deathScreen();
         }
-    }
+    };
 
-    public void heal(int healAmount) {
-    }
-
-    //
-    //
-    //
 
     /******************************************************************************
      *  以下是关于牌的一些方法
-     *
      ******************************************************************************/
 
-    // 多态，摸一张或者amount张
-    public void draw() {
-        draw(1);
-    }
-
-    public void draw(int amount) {
+    // 从摸牌堆摸牌然后放进手牌堆堆的行为。并且返回被摸的牌
+    public ArrayList<AbstractCard> drawAndPeek(int amount) {
+        ArrayList<AbstractCard> cards = new ArrayList<>();
+        if (amount <= 0) {
+            System.out.println("DrawAndPeek: no card is drawn.");
+            return cards;
+        }
         // 限制摸牌数量，总手牌数不得超过上限
         if (this.hand.size() + amount > hand_max) {
-            draw(hand_max - amount);
             // messagebox
-            return;
+            return drawAndPeek(hand_max - amount);
         }
         // 不可能发足够牌
         if (this.drawPile.size() + this.discardPile.size() < amount) {
-            draw(this.drawPile.size() + this.discardPile.size());
-            return;
+            return drawAndPeek(this.drawPile.size() + this.discardPile.size());
         }
         // 摸牌堆没牌或者不够，洗牌
         if (this.drawPile.size() < amount || this.drawPile.size() <= 0) {
@@ -212,14 +253,33 @@ public abstract class AbstractPlayer extends AbstractCreature {
         //
         for (int i = 0; i < amount; i++) {
             // System.out.println("before drawPile.drawFromTop size "+drawPile.size());
-            hand.addToTop(drawPile.drawFromTop());
+            AbstractCard card = drawPile.drawFromTop();
+            cards.add(card);
+            System.out.println(this.name + " draws a " + card.NAME);
+            hand.addToTop(card);
             this.onCardDrawOrDiscard(); // 每摸一张牌，就触发一次？
             this.onRefreshHand();
         }
-        // 如果摸完牌之后摸牌堆没牌，洗牌
-        if (this.drawPile.size() <= 0 && !this.discardPile.isEmpty()) {
-            AbstractDungeon.actionManager.addToTop(new ShuffleAction(this));
+        // 如果摸完牌之后摸牌堆没牌，并不立即洗牌。下次需要摸牌时触发
+
+        if (cards.size() <= 0) {
+            System.out.println("DrawAndPeek: no card is drawn.");
         }
+        return cards;
+    }
+
+    // 从摸牌堆摸牌然后放进手牌堆堆的行为。不返回被摸的牌
+    public void draw(int amount) {
+        drawAndPeek(amount);
+    }
+
+    // 多态，摸一张或者amount张
+    public void draw() {
+        draw(1);
+    }
+    // avoid outOfBoundException
+    public ArrayList<AbstractCard> drawAndPeek() {
+        return drawAndPeek(1);
     }
 
     public void useCard(AbstractCard c, AbstractCreature target, int energyOnUse) {
@@ -228,8 +288,9 @@ public abstract class AbstractPlayer extends AbstractCreature {
             // useFastAttackAnimation();
         }
 
-        c.calculateCardDamage(target); // 暂时没用，空方法
-        // 搞不懂什么意思
+//        c.calculateCardDamage(this, target); // 暂时没用，空方法
+
+        // x-cost的卡：用光
 //        if (c.cost == -1 && EnergyPanel.totalCount < energyOnUse && !c.ignoreEnergyOnUse) {
 //            c.energyOnUse = EnergyPanel.totalCount;
 //        }
@@ -280,6 +341,7 @@ public abstract class AbstractPlayer extends AbstractCreature {
         moveToDiscardPile(c); // 这个方法里含有this.onCardDrawOrDiscard()
     }
 
+    // 烧掉这张牌（放入烧牌堆
     public void exhaustCard(AbstractCard c) {
         c.onExhaust();
         exhaustPile.addToTop(c);
@@ -287,7 +349,6 @@ public abstract class AbstractPlayer extends AbstractCreature {
 
     /******************************************************************************
      *  以下是关于Ring和Buff的code
-     *
      ******************************************************************************/
     public ArrayList<AbstractRing> rings = new ArrayList<>();
 
@@ -298,6 +359,14 @@ public abstract class AbstractPlayer extends AbstractCreature {
         //
     }
 
+    @Override
+    public void atTurnEnd() {
+        ArrayList<AbstractBuff> buffsToCheck = new ArrayList<>(this.buffs);
+        for (AbstractBuff buff: buffsToCheck) {
+            buff.atEndOfTurn();
+        }
+    }
+
     public void atTurnStart() {
         for (AbstractRing r: this.rings) {
             r.atTurnStart();
@@ -305,14 +374,18 @@ public abstract class AbstractPlayer extends AbstractCreature {
         //
     }
 
+    // buff相关的在上一层的abstract creature里
+
     public boolean hasRing(String ringName) {
         if (this.rings.isEmpty()) {
             return false;
         }
-        if (this.getRing(ringName) == null) {
-            return false;
-        }
-        return true;
+        return this.getRing(ringName) != null;
+    }
+
+    public void obtainRing(AbstractRing ring) {
+        ring.onObtain();
+        this.rings.add(ring);
     }
 
     public AbstractRing getRing(String ringName) {
@@ -321,7 +394,6 @@ public abstract class AbstractPlayer extends AbstractCreature {
                 return r;
             }
         }
-        System.out.println("null");
         return null;
     }
 
@@ -340,4 +412,7 @@ public abstract class AbstractPlayer extends AbstractCreature {
         }
         // buff
     }
+
+    public void initializeTestRings() {}
+
 }

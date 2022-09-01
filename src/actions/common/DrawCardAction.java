@@ -2,6 +2,7 @@ package actions.common;
 import actions.AbstractGameAction;
 import core.AbstractCreature;
 import cards.AbstractCard;
+import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
 
 import java.util.ArrayList;
@@ -9,14 +10,14 @@ import java.util.ArrayList;
 
 // always draw to onStagePlayer
 public class DrawCardAction extends AbstractGameAction{
-    public static ArrayList<AbstractCard> drawnCards = new ArrayList<>();
+    public ArrayList<AbstractCard> drawnCards = new ArrayList<>();
     private boolean clearDrawHistory = true;
 
     public DrawCardAction(AbstractCreature source, int amount, boolean endTurnDraw) {
         if (endTurnDraw) {
             // pass
         }
-        setValues((AbstractCreature) AbstractDungeon.onStagePlayer, source, amount);
+        setValues(AbstractDungeon.onStagePlayer, source, amount);
         this.actionType = AbstractGameAction.ActionType.DRAW;
     }
 
@@ -30,38 +31,39 @@ public class DrawCardAction extends AbstractGameAction{
             // drawnCards.clear();
         }
 
-//        if (AbstractDungeon.player.hasPower("No Draw")) {
-//            AbstractDungeon.player.getPower("No Draw").flash();
-//            endActionWithFollowUp();
-//
-//            return;
-//        }
-        if (this.amount <= 0) {
-            // endActionWithFollowUp();
-            return;
-        }
+        try {
+            AbstractPlayer p = (AbstractPlayer) source;
+            if (p.hasBuff("NoDraw")) {
+                // messagebox
+                return;
+            }
 
-        int drawSize = AbstractDungeon.onStagePlayer.drawPile.size();
-        int discardSize = AbstractDungeon.onStagePlayer.discardPile.size();
+            if (this.amount <= 0) {
+                // endActionWithFollowUp();
+                return;
+            }
 
-        if (drawSize + discardSize <= 0) {
-            // endActionWithFollowUp();
-            return;
-        }
+            int drawSize = p.drawPile.size();
+            int discardSize = p.discardPile.size();
 
-        if (AbstractDungeon.onStagePlayer.hand.size() == AbstractDungeon.onStagePlayer.hand_max) {
-            // AbstractDungeon.onStagePlayer.createHandIsFullDialog();
-            // endActionWithFollowUp();
-            // messagebox hand is full
-            return;
-        }
+            if (drawSize + discardSize <= 0) {
+                // endActionWithFollowUp();
+                return;
+            }
 
-        // 把是否需要洗牌的判断放到AbstractPlayer里面。
-        // 重新从外部添加洗牌action
+            if (p.hand.size() >= p.hand_max) {
+                // AbstractDungeon.onStagePlayer.createHandIsFullDialog();
+                // endActionWithFollowUp();
+                // messagebox hand is full
+                return;
+            }
 
-        AbstractDungeon.onStagePlayer.draw(amount);
-        isDone = true;
-        // AbstractGUI.reLayoutHand();
+            // 把是否需要洗牌的判断放到AbstractPlayer里面。
+            // 重新从外部添加洗牌action
+            drawnCards = p.drawAndPeek(amount);
+            isDone = true;
+            // AbstractGUI.reLayoutHand();
+        } catch (ClassCastException e) { e.printStackTrace(); }
     }
 
 }

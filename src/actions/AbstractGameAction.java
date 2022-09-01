@@ -8,7 +8,6 @@ import core.AbstractCreature;
  *  GameAction的抽象父类，所有GameAction都必须extend这个类，并且实现update()方法。
  *  GameAction是一种游戏中的action，这样设计用来等待前端动画执行的时间。
  *  应该有一个during参数来决定动画执行时长。（暂无
- *
  ******************************************************************************/
 
 public abstract class AbstractGameAction {
@@ -18,9 +17,10 @@ public abstract class AbstractGameAction {
     public ActionType actionType;
     public AbstractCreature source;
     public AbstractPlayer p;
-    public boolean endTurn = false;
     public boolean isDone;
     public AttackEffect attackEffect;
+
+    public DamageInfo.DamageType damageType;
 
     protected void setValues(AbstractCreature target, AbstractCreature source, int amount) {
         this.target = target;
@@ -81,5 +81,4 @@ public abstract class AbstractGameAction {
     protected void addToTop(AbstractGameAction action) {
         AbstractDungeon.actionManager.addToTop(action);
     }
-
 }

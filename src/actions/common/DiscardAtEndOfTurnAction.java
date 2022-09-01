@@ -11,7 +11,6 @@ import java.util.Iterator;
 
 
 public class DiscardAtEndOfTurnAction extends AbstractGameAction {
-    // private static final float DURATION = Settings.ACTION_DUR_XFAST;
 
     public void update() {
         // if (this.duration == DURATION) {
@@ -47,4 +46,3 @@ public class DiscardAtEndOfTurnAction extends AbstractGameAction {
     }
 
 }
-

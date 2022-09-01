@@ -1,8 +1,8 @@
 package core;
 
-import buff.AbstractBuff;
+import actions.GameActionManager;
+import buffs.AbstractBuff;
 import cards.DamageInfo;
-
 import java.util.ArrayList;
 
 /******************************************************************************
@@ -36,8 +36,53 @@ public abstract class AbstractCreature {
         // effect
     }
 
+    public int calculateDamageReceive(DamageInfo info) {
+        int damageAmount = info.output;
+        if (damageAmount < 0) {
+            damageAmount = 0;
+        }
+        for (AbstractBuff buff: this.buffs) {
+            if (buff.modifyDamageReceive) {
+                damageAmount = buff.atDamageReceive(info, damageAmount);
+            }
+        }
+        return damageAmount;
+    }
 
-    public abstract void damage(DamageInfo paramDamageInfo);
+    public void damage(DamageInfo info) {
+        boolean hadBlock = true;
+        if (this.block == 0) {
+            hadBlock = false;
+        }
+        int damageAmount = calculateDamageReceive(info);
+        damageAmount = decrementBlock(info, damageAmount); // decrementBlock来自父类
+
+        // for relics and buffs to take affect
+
+        GameActionManager.damageReceivedThisTurn += damageAmount;
+        GameActionManager.damageReceivedThisCombat += damageAmount;
+
+        this.health -= damageAmount;
+        System.out.println(this.name+" takes "+damageAmount+" damage."+
+                " Now HP "+this.health);
+
+//        if (damageAmount > 0 && (AbstractDungeon.getCurrRoom()).phase == AbstractRoom.RoomPhase.COMBAT) {
+//            updateCardsOnDamage();
+//            this.damagedThisCombat++;
+//        }
+
+        if (this.health < 0) {
+            this.health = 0;
+        } else if (this.health < this.maxHP / 2.0F) {
+            // effect
+        }
+        // AbstractGUI.updateHealthBar(this);
+
+        if (this.health < 1) {
+            this.isDead = true;
+            // AbstractGUI.deathScreen();
+        }
+    };
 
     // 格挡被减少的方法
     protected int decrementBlock(DamageInfo info, int damageAmount) {
@@ -82,11 +127,6 @@ public abstract class AbstractCreature {
         loseBlock(this.block);
     }
 
-    // 还没有implement buffs
-    public boolean hasBuff(String buffName) {
-       return false;
-    }
-
     public boolean isDeadOrEscaped() {
         if (this.isDying || this.isDead) {
             return true;
@@ -99,7 +139,36 @@ public abstract class AbstractCreature {
      ******************************************************************************/
     public ArrayList<AbstractBuff> buffs = new ArrayList<>();
 
-    public AbstractBuff getBuff(String buff_name) {
+    public boolean hasBuff(String buff_id) {
+        return getBuff(buff_id) != null;
+    }
+
+    public AbstractBuff getBuff(String buff_id) {
+        for (AbstractBuff buff: buffs) {
+            if (buff.ID.equals(buff_id)) {
+                return buff;
+            }
+        }
         return null;
+    }
+
+    public void removeBuff(AbstractBuff buff) {
+        boolean success = buffs.remove(buff);
+        if (!success) {
+            System.out.println("WARNING: removeBuff fails. No buff found.");
+        }
+    }
+
+    // 暂时写在这里。在自己的回合结束时，触发所有buff的结束回合
+    public void atTurnEnd() {
+        for (AbstractBuff buff: this.buffs) {
+            buff.atEndOfTurn();
+        }
+    }
+
+    public void atPreBattle() {
+        for (AbstractBuff buff: this.buffs) {
+            buff.atPreBattle();
+        }
     }
 }

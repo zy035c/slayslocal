@@ -18,7 +18,6 @@ public class Strike extends AbstractCard {
     private static final int COST = 1;
     private static final int ATTACK_DMG = 7;
     private static final int UPGRADE_PLUS_DMG = 3;
-    DamageInfo.DamageType damageTypeForTurn;
 
     public Strike() {
         super(ID, NAME, IMG_PATH, COST, DESCRIPTION,
@@ -30,7 +29,7 @@ public class Strike extends AbstractCard {
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
-        calculateDamage();
+//        calculateDamage();
         DamageInfo tempInfo = new DamageInfo((AbstractCreature)p, this.damage, this.damageTypeForTurn);
         AbstractDungeon.actionManager.addToTop((AbstractGameAction)new DamageAction((AbstractCreature)m, tempInfo));
     }

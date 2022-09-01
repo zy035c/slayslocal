@@ -3,6 +3,7 @@ package rings;
 import actions.AbstractGameAction;
 import actions.common.RingAboveCreatureAction;
 import actions.common.DrawCardAction;
+import core.AbstractPlayer;
 import dungeons.AbstractDungeon;
 
 public class Jormungandr extends AbstractRing {
@@ -10,11 +11,11 @@ public class Jormungandr extends AbstractRing {
     public static final String ID = "Jormungandr";
     private boolean canDraw = false;
     private boolean disabledUntilEndOfTurn = false;
-    private String description = "Whenever you have no cards in hand during your turn, draw a card.";
+    private static final String description = "Whenever you have no cards<br>in hand during your turn,<br>draw a card.";
 
-    public Jormungandr() {
-        super(name,ID, "", RingTier.RARE, LandingSound.CLINK);
-        this.description = description;
+    public Jormungandr(AbstractPlayer owner) {
+        super(name,ID, description, "", RingTier.RARE, owner, LandingSound.CLINK);
+
     }
 
     public void atPreBattle() {
@@ -36,7 +37,7 @@ public class Jormungandr extends AbstractRing {
                 !AbstractDungeon.actionManager.turnHasEnded && // 如果不能摸牌或者回合已经结束，不要执行摸牌
                 this.canDraw
             // && !AbstractDungeon.onStagePlayer.hasPower("No Draw")
-            // && !AbstractDungeon.isScreenUp
+            // && !AbstractDungeon.isScreenUp/**/
         ){
             if ((AbstractDungeon.onStagePlayer.discardPile.size() > 0 || AbstractDungeon.onStagePlayer.drawPile.size() > 0)) {
                     // if ((AbstractDungeon.getCurrRoom()).phase == AbstractRoom.RoomPhase.COMBAT
@@ -54,7 +55,7 @@ public class Jormungandr extends AbstractRing {
     }
 
     public AbstractRing makeCopy() {
-        return new Jormungandr();
+        return new Jormungandr(this.owner);
     }
 
 }

@@ -7,7 +7,6 @@ import dungeons.AbstractDungeon;
 /******************************************************************************
  *  所有卡的抽象父类，所有卡都必须extend这个类，并且实现构造器和use()方法。
  *  卡被打出时，向GameActionManager动作队列里添加对应的动作。
- *
  ******************************************************************************/
 public abstract class AbstractCard {
 
@@ -32,6 +31,8 @@ public abstract class AbstractCard {
     public int damage = -1, block = -1,
             magicNumber = -1, heal = -1,
             draw = -1, discard = -1;
+    public int damageOnTarget = -1, blockOnTarget = -1,
+            magicNumberOnTarget = -1, healOnTarget = -1;
 
     protected DamageInfo.DamageType damageType;
     public DamageInfo.DamageType damageTypeForTurn;
@@ -56,10 +57,6 @@ public abstract class AbstractCard {
         this.targetType = targetType;
         // this.damageType = dType;
         this.costForTurn = this.cost;
-
-        calculateDamage();
-        calculateBlock();
-        calculateMagicNumber();
     }
 
     // 简单判断有无可能被打出
@@ -80,13 +77,12 @@ public abstract class AbstractCard {
         }
 
         // power, relics
-
         return hasEnoughEnergy();
     }
 
     // 能否对目标对象使用
     public boolean canUse(AbstractPlayer p, AbstractCreature m) {
-        if (canPlay() && hasEnoughEnergy()) {
+        if (canPlay() && hasEnoughEnergy() && cardPlayable(m)) {
             return true;
         }
         return false;
@@ -142,7 +138,6 @@ public abstract class AbstractCard {
     public abstract void use(AbstractPlayer paramAbstractPlayer, AbstractCreature paramAbstractMonster);
 
 
-
     // 创造一个数据完全一致的复制品。UUID不一致。
     @Deprecated
     public AbstractCard makeStatEquivalentCopy() {
@@ -179,11 +174,6 @@ public abstract class AbstractCard {
         return card;
     }
 
-    public void calculateCardDamage(AbstractCreature target) {
-        //
-
-    }
-
     /******************************************************************************
      *  以下是关于卡使用、打出、结束回合弃牌时的特殊情况。
      *
@@ -206,16 +196,24 @@ public abstract class AbstractCard {
     boolean upgradedMagicNumber = false;
     boolean isBlockModified;
     boolean isDamageModified;
+    boolean isMagicNumberModified;
 
-    public void calculateBlock() {
+    public void calculateBlock(AbstractPlayer user) {
         this.block = this.baseBlock;
+        if (user.hasBuff("Agility")) {
+
+        }
     }
 
-    public void calculateDamage() {
-        this.damage = this.baseDamage;
+    public void calculateDamage(AbstractPlayer user) {
+        if (user.hasBuff("buffs.Strength")) {
+            this.damage = this.baseDamage + user.getBuff("buffs.Strength").stack;
+        } else {
+            this.damage = this.baseDamage;
+        }
     }
 
-    public void calculateMagicNumber() {
+    public void calculateMagicNumber(AbstractPlayer user) {
         this.magicNumber = this.baseMagicNumber;
     }
 
@@ -281,22 +279,35 @@ public abstract class AbstractCard {
             this.block = this.baseBlock;
             this.isBlockModified = true;
         }
-        /*  822 */
-//        if (this.upgradedMagicNumber) {
-//            /*  823 */
-//            this.magicNumber = this.baseMagicNumber;
-//            /*  824 */
-//            this.isMagicNumberModified = true;
-//            /*      */
-//        }
+        if (this.upgradedMagicNumber) {
+            this.magicNumber = this.baseMagicNumber;
+            this.isMagicNumberModified = true;
+        }
     }
 
-    // 直接获得descr
+    // 在战斗外可见的raw描述
     public String getDescription() {
+        String descript = this.DESCRIPTION.replace(
+                "!DAMAGE!",
+                Integer.toString(this.baseDamage)
+        );
+        descript = descript.replace(
+                "!BLOCK!",
+                Integer.toString(this.baseBlock)
+        );
+        descript = descript.replace(
+                "!MAGIC!",
+                Integer.toString(this.baseMagicNumber)
+        );
+        return descript;
+    }
 
-        calculateBlock();
-        calculateDamage();
-        calculateMagicNumber();
+    // 获得在当前对局状况下的description。这个方法在打出牌前必定被call一次，
+    // 也就是牌被抽出来（而非在masterdeck查看的时候）会call一次！
+    public String getDescriptionInBattle(AbstractPlayer user) {
+        calculateBlock(user);
+        calculateDamage(user);
+        calculateMagicNumber(user);
 
         String descript = this.DESCRIPTION.replace(
                 "!DAMAGE!",
@@ -313,9 +324,34 @@ public abstract class AbstractCard {
         return descript;
     }
 
-    // 在选择了目标的时候获得descr
-    public String getDescriptionOnTarget(AbstractCreature target) {
-        return this.DESCRIPTION;
+    // 在选择了目标的时候获得description
+    public String getDescriptionOnTarget(AbstractPlayer player, AbstractCreature target) {
+        calculateDamageOnTarget(player, target);
+        String descript = this.DESCRIPTION.replace(
+                "!DAMAGE!",
+                Integer.toString(this.damageOnTarget)
+        );
+        descript = descript.replace(
+                "!BLOCK!",
+                Integer.toString(this.block)
+        );
+        descript = descript.replace(
+                "!MAGIC!",
+                Integer.toString(this.magicNumber)
+        );
+        return descript;
+    }
+
+    // 在选择了目标之后计算伤害量来更新卡面
+    public void calculateDamageOnTarget(AbstractPlayer p, AbstractCreature target) {
+        // assume this card is played on the target
+        if (this.type == CardType.ATTACK) {
+            damageOnTarget = target.calculateDamageReceive(new DamageInfo(
+                    p,
+                    this.damage,
+                    this.damageTypeForTurn
+            ));
+        }
     }
 
     /******************************************************************************

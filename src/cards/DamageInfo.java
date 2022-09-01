@@ -23,6 +23,9 @@ public class DamageInfo {
         this.type = type;
     }
 
+    /******************************************************************************
+     *  NORMAL：攻击牌造成的主动物理伤害。
+     ******************************************************************************/
     public enum DamageType {
         NORMAL, THORNS, HP_LOSS, FIRE; // infusion
     }

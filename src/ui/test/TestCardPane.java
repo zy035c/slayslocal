@@ -50,7 +50,7 @@ public class TestCardPane extends JLayeredPane {
 
     JLabel cardTitle;
     JLabel cardImage;
-    JTextPane description;
+    JLabel description;
 
     private int titleWidth;
     private int titleHeight;
@@ -129,19 +129,17 @@ public class TestCardPane extends JLayeredPane {
         add(this.cardTitle, BorderLayout.NORTH);
 
 
-
-
         // 设置描述部分
-        description = new JTextPane();
+        description = new JLabel();
         // @Test
         String testString = "Gain 5 Block.\nUpgrade ALL your cards.\nExhaust.";
         description.setForeground(Color.WHITE); // 字体颜色
         description.setBackground(descript_col); // 背景颜色
         description.setLayout(new FlowLayout()); // 流式布局
         description.setAlignmentY(Component.CENTER_ALIGNMENT); //
-        description.setEditable(false); // 不可编辑
+        // description.setEditable(false); // 不可编辑
         description.setFocusable(false); // 不可加光标
-        description.setDragEnabled(false); // 里面的文字不可以被拖动
+        // description.setDragEnabled(false); // 里面的文字不可以被拖动
 
         // 加入LayeredPane的监听器。使得被拖动时call那个监听器
         description.addMouseListener(this.getMouseListeners()[0]);
@@ -149,13 +147,17 @@ public class TestCardPane extends JLayeredPane {
 
         description.setFont(new Font("", Font.PLAIN, 12));
         // 关键字标黄：之后来慢慢调整
-        StyledDocument doc = description.getStyledDocument();
-        SimpleAttributeSet center = new SimpleAttributeSet();
-        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
-        doc.setParagraphAttributes(0, doc.getLength(), center, false);
-        // testString = "<html><div align=\"center\" style=\"font-size: 10px\" >" + testString + "</html>";
+//        StyledDocument doc = description.getStyledDocument();
+//        SimpleAttributeSet center = new SimpleAttributeSet();
+//        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+//        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+
+        testString = "<html><div align=\"center\" style=\"font-size: 7px\" >" + testString + "</html>";
         // description.setContentType("text/html");
         // testString = " \n" + testString; // 强制换掉第一行
+
+        description.setVerticalAlignment(SwingConstants.CENTER);
+        description.setHorizontalAlignment(SwingConstants.CENTER);
         description.setText(testString);
 
         description.setPreferredSize(new Dimension(
@@ -166,6 +168,7 @@ public class TestCardPane extends JLayeredPane {
         // 在整个pane的BorderLayout下，这个TextArea处于SOUTH位置，根据HEIGHT自动适配location
         description.setBorder(new SoftBevelBorder(SoftBevelBorder.LOWERED)); // 加上内陷的border
         add(description, BorderLayout.SOUTH);
+        description.repaint();
         moveBack();
 
         // 加上image

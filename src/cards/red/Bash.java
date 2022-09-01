@@ -1,10 +1,11 @@
 package cards.red;
 
-import buff.AbstractBuff;
+import buffs.AbstractBuff;
 import actions.AbstractGameAction;
 import actions.common.ApplyBuffAction;
 import actions.common.DamageAction;
-import buff.VulnerableBuff;
+import buffs.CompromiseBuff;
+
 import cards.AbstractCard;
 import cards.DamageInfo;
 import core.AbstractCreature;
@@ -16,31 +17,36 @@ public class Bash extends AbstractCard {
     public static final String ID = "cards.red.Bash";
     public static final String NAME = "Bash";
     public static final String DESCRIPTION = "Deal !DAMAGE! damage.\n" +
-            "Apply !MAGIC! Vulnerable.";
+            "Apply !MAGIC! Compromise.";
     public static final String IMG_PATH = "";
 
     private static final int COST = 2;
     private static final int ATTACK_DMG = 8;
-    private DamageInfo.DamageType damageTypeForTurn;
-
-
+    private static final int UPGRADE_PLUS_DMG = 2;
+    private static final int MAGIC_NUMBER = 2;
+    private static final int UPGRADE_PLUS_MGC = 1;
     public Bash() {
         super(ID, NAME, IMG_PATH, COST, DESCRIPTION,
                 AbstractCard.CardType.ATTACK, AbstractCard.CardColor.RED,
                 AbstractCard.CardRarity.BASIC, AbstractCard.CardTarget.SINGLE);
         this.baseDamage = ATTACK_DMG;
-        this.baseMagicNumber = 2;
-        this.magicNumber = this.baseMagicNumber;
+        this.baseMagicNumber = MAGIC_NUMBER;
+        // this.magicNumber = this.baseMagicNumber;
+        this.damageTypeForTurn = DamageInfo.DamageType.NORMAL;
     }
 
     public void use(AbstractPlayer p, AbstractCreature m) {
-        calculateDamage();
+        calculateDamage(p);
         // if SETTING.debug
         // addToBot(new DamageAllEnemiesAction(
         // else {
-        AbstractGameAction act1 = new DamageAction(m , new DamageInfo(p, this.damage, this.damageTypeForTurn), AbstractGameAction.AttackEffect.BLUNT_HEAVY);
+        AbstractGameAction act1 = new DamageAction(
+                m,
+                new DamageInfo(p, this.damage, this.damageTypeForTurn),
+                AbstractGameAction.AttackEffect.BLUNT_HEAVY
+        );
         AbstractDungeon.actionManager.addToTop(act1);
-        AbstractBuff buff = new VulnerableBuff(m, this.magicNumber, false);
+        AbstractBuff buff = new CompromiseBuff(m, this.magicNumber, false);
         AbstractGameAction act2 = new ApplyBuffAction(m, p, buff, this.magicNumber);
         AbstractDungeon.actionManager.addToTop(act2);
     }
@@ -48,8 +54,8 @@ public class Bash extends AbstractCard {
     public void upgrade() {
         if (!this.upgraded) {
             upgradeName();
-            upgradeDamage(2);
-            upgradeMagicNumber(1);
+            upgradeDamage(UPGRADE_PLUS_DMG);
+            upgradeMagicNumber(UPGRADE_PLUS_MGC);
         }
     }
 

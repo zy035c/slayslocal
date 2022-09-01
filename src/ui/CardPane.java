@@ -3,17 +3,16 @@ package ui;
 import cards.AbstractCard;
 import cards.common.Strike;
 
-import dungeons.DungeonScene;
-import localization.CardStrings;
+import core.AbstractCreature;
+import core.AbstractPlayer;
+import dungeons.AbstractDungeon;
+import core.DungeonScene;
 import ui.listeners.CardPaneListener;
-import ui.listeners.TestListener;
-import ui.window.CustomFrame;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.font.TextLayout;
 
 
 /******************************************************************************
@@ -31,7 +30,6 @@ public class CardPane extends JLayeredPane {
     public CardPane(AbstractCard card, int cardX, int cardY, DungeonScene scene) {
         originalX = cardX;
         originalY = cardY;
-        // this.setBorder(b);
 
         this.scene = scene;
         this.card = card;
@@ -46,12 +44,6 @@ public class CardPane extends JLayeredPane {
 
         initCardPane();
     }
-
-    // 166, 676
-    // 376
-    // 594
-    // 832
-    // 1066
 
     JLabel cardTitle;
     JLabel cardImage;
@@ -91,7 +83,8 @@ public class CardPane extends JLayeredPane {
                 // do nothing
                 break;
             case GREEN:
-                //
+                card_col = GameColors.card_green;
+                descript_col = GameColors.card_green2;
                 break;
         }
 
@@ -110,7 +103,11 @@ public class CardPane extends JLayeredPane {
 
         // 设置整体
         this.setBackground(card_col); // 设置整体颜色
-        EtchedBorder eb = new EtchedBorder(EtchedBorder.LOWERED); // 最外层border
+        EtchedBorder eb = new EtchedBorder(
+                EtchedBorder.LOWERED,
+                GameColors.card_highlight,
+                GameColors.card_highlight
+        ); // 最外层border
         LineBorder lineBorder = new LineBorder(card_col, border_width); // 包含cost的line border
         String cost = this.card.getCost();
         costBorder = new TitledBorder(lineBorder, cost); // title border里写上cost的string
@@ -159,9 +156,7 @@ public class CardPane extends JLayeredPane {
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
-        // testString = "<html><div align=\"center\" style=\"font-size: 10px\" >" + testString + "</html>";
-        // description.setContentType("text/html");
-        // testString = " \n" + testString; // 强制换掉第一行
+        // 目前只更新rawDescription
         description.setText(this.card.getDescription());
 
         description.setPreferredSize(new Dimension(
@@ -183,11 +178,13 @@ public class CardPane extends JLayeredPane {
         LineBorder imageLineBorder = new LineBorder(title_col, 5);
         TitledBorder imageBorder = new TitledBorder(
                 imageLineBorder,
-                this.card.type.toString()
+                this.card.type.toString(),
+                TitledBorder.CENTER,
+                TitledBorder.BOTTOM
         );
         Font typeFont = new Font("ROMAN", Font.PLAIN, 10);
         imageBorder.setTitleColor(Color.WHITE);
-        imageBorder.setTitlePosition(TitledBorder.BOTTOM);
+        // imageBorder.setTitlePosition(TitledBorder.BOTTOM, TitledBorder.CENTER);
         imageBorder.setTitleFont(typeFont);
         cardImage.setBorder(imageBorder);
         this.add(cardImage, BorderLayout.CENTER);
@@ -212,12 +209,6 @@ public class CardPane extends JLayeredPane {
      * 以下是交互的方法。
      *
      ******************************************************************************/
-
-    // 这可谓是阴险的小把戏啊
-    // 必须使用(Event evt, int x, int y)
-    // 才能有效的overrides deprecated method in java.awt.Component
-
-
     public boolean checkPlayableOnClick() {
         if (!card.canPlay()) {
             if (!card.hasEnoughEnergy()) {
@@ -247,12 +238,38 @@ public class CardPane extends JLayeredPane {
         return this.getRect().intersects(GUI.getPlayArea());
     }
 
-    public void updateDisplay() {
+    public void updateDisplayOutTurn() {
         cardTitle.setText(this.card.NAME);
-        description.setText(this.card.getDescription());
         costBorder.setTitle(this.card.getCost());
+        updateDescription();
+        this.repaint();
     }
 
+    // 回合内
+    public void updateDisplayInTurn(AbstractPlayer player) {
+        cardTitle.setText(this.card.NAME);
+        costBorder.setTitle(this.card.getCost());
+        updateDescription(player);
+        this.repaint();
+    }
+
+    // 无玩家更新描述
+    public void updateDescription() {
+        description.setText(this.card.getDescription());
+    }
+
+    // 确定打出者的时候更新描述
+    public void updateDescription(AbstractPlayer p) {
+        description.setText(this.card.getDescriptionInBattle(p));
+    }
+
+    // 确定打出者和目标的时候更新描述
+    public void updateDescriptOnTarget(AbstractPlayer player, AbstractCreature target) {
+        description.setText(this.card.getDescriptionOnTarget(player, target));
+        this.repaint();
+    }
+
+    // @Test 测试用
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setSize(500, 500);

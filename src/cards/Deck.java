@@ -15,6 +15,20 @@ public class Deck {
 
     public enum DECK_TYPE {
         DRAW_PILE, DISCARD_PILE, HAND, MASTER_DECK, EXHAUST_PILE, LIMBO;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case DRAW_PILE:
+                    return "Draw Pile";
+                case DISCARD_PILE:
+                    return "Discard Pile";
+                case EXHAUST_PILE:
+                    return "Exhaust Pile";
+            }
+            return "";
+        }
+
     }
     // LIMBO是回合结束后保留到下回合到牌的牌堆
 

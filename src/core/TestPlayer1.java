@@ -1,13 +1,12 @@
 package core;
 
 import cards.AbstractCard;
-import cards.Deck;
 import cards.colorless.Apotheosis;
 import cards.common.*;
 import cards.red.*;
 import cards.red.Anger;
 import cards.red.Clash;
-import core.AbstractCreature;
+import rings.Jormungandr;
 
 import java.util.ArrayList;
 public class TestPlayer1 extends AbstractPlayer {
@@ -59,7 +58,15 @@ public class TestPlayer1 extends AbstractPlayer {
 
         this.masterDeck.addToTop((AbstractCard)new Bash());
         this.masterDeck.addToTop((AbstractCard)new Bash());
+        this.masterDeck.addToTop((AbstractCard)new BodySlam());
+        this.masterDeck.addToTop((AbstractCard)new BodySlam());
+        this.masterDeck.addToTop((AbstractCard)new Inflame());
+        this.masterDeck.addToTop((AbstractCard)new Inflame());
     }
 
+    @Override
+    public void initializeTestRings() {
+        this.obtainRing(new Jormungandr(this));
+    }
 }
 

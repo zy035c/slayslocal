@@ -12,13 +12,16 @@ import ui.window.CustomFrame;
 import static ui.GUI.calcX;
 import static ui.GUI.calcY;
 
-public class DungeonScene implements Runnable {
+/******************************************************************************
+ * 含有线程的代码备份
+ ******************************************************************************/
+public class DungeonSceneThread implements Runnable {
 
     public Exordium dungeon;
     public CustomFrame frame;
     public GUI gui;
 
-    public DungeonScene(GUI gui, Exordium dungeon, CustomFrame frame) {
+    public DungeonSceneThread(GUI gui, Exordium dungeon, CustomFrame frame) {
         this.dungeon = dungeon;
         this.frame = frame;
         this.gui = gui;
@@ -40,24 +43,20 @@ public class DungeonScene implements Runnable {
     }
 
     /******************************************************************************
-     * MouseListener相关
-     ******************************************************************************/
-
-
-    /******************************************************************************
      * 线程相关
      ******************************************************************************/
 
     public void init() {
         initCreatureUI();
         dungeon.init_dungeon();
+        initGUI();
         updateDungeonDisplay();
-        gui.setPiles(
-                AbstractDungeon.onStagePlayer.drawPile,
-                AbstractDungeon.onStagePlayer.discardPile,
-                AbstractDungeon.onStagePlayer.exhaustPile,
-                AbstractDungeon.onStagePlayer.masterDeck
-        );
+//        gui.setPiles(
+//                AbstractDungeon.onStagePlayer.drawPile,
+//                AbstractDungeon.onStagePlayer.discardPile,
+//                AbstractDungeon.onStagePlayer.exhaustPile,
+//                AbstractDungeon.onStagePlayer.masterDeck
+//        );
 
         dungeon.start_turn();
         updateDungeonDisplay();
@@ -83,12 +82,6 @@ public class DungeonScene implements Runnable {
 
     @Override
     public void run() {
-        // repaint();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ignored) {
-        }
-        // repaint();
     }
 
     /******************************************************************************
@@ -153,19 +146,37 @@ public class DungeonScene implements Runnable {
         }
 
         int i = 0;
-        for (AbstractCard card : AbstractDungeon.onStagePlayer.hand.deckCards) {
-            CardPane pane = new CardPane(
-                    card, x_corr[i], CARD_Y, this
-            );
-            this.panes.add(pane);
-            this.frame.add(pane);
-            i++;
-        }
+//        for (AbstractCard card : AbstractDungeon.onStagePlayer.hand.deckCards) {
+//            CardPane pane = new CardPane(
+//                    card, x_corr[i], CARD_Y, this
+//            );
+//            this.panes.add(pane);
+//            this.frame.add(pane);
+//            i++;
+//        }
         System.out.println("Updating screen card panes done.");
     }
 
     public void endTurn() {
 
+    }
+
+    public void initGUI() {
+        if (AbstractDungeon.onStagePlayer == null) {
+            return;
+        }
+        int e = AbstractDungeon.onStagePlayer.energy;
+        int eCap = AbstractDungeon.onStagePlayer.energyCap;
+        gui.updateEnergyPanel(e, eCap);
+        gui.updateDiscardNumber(AbstractDungeon.onStagePlayer.discardPile.size());
+        gui.updateDrawNumber(AbstractDungeon.onStagePlayer.drawPile.size());
+        for (CreatureGUI cgui: GuiSets) {
+            cgui.updateBlockBar();
+            cgui.updateHealthBar();
+            cgui.updateBuffBar();
+            gui.updatePlayerPanel(AbstractDungeon.onStagePlayer.name);
+            gui.exhaust_pile.setText(Integer.toString(AbstractDungeon.onStagePlayer.exhaustPile.size()));
+        }
     }
 
     // 没有动画前的替代方案
@@ -179,6 +190,8 @@ public class DungeonScene implements Runnable {
         int eCap = AbstractDungeon.onStagePlayer.energyCap;
         gui.updateEnergyPanel(e, eCap);
 
+        System.out.println("----" + AbstractDungeon.onStagePlayer.name + " updates" +
+                " discard number = " + AbstractDungeon.onStagePlayer.discardPile.size());
         gui.updateDiscardNumber(AbstractDungeon.onStagePlayer.discardPile.size());
         gui.updateDrawNumber(AbstractDungeon.onStagePlayer.drawPile.size());
 
@@ -190,5 +203,4 @@ public class DungeonScene implements Runnable {
         gui.updatePlayerPanel(AbstractDungeon.onStagePlayer.name);
         gui.exhaust_pile.setText(Integer.toString(AbstractDungeon.onStagePlayer.exhaustPile.size()));
     }
-
 }

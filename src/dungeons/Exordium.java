@@ -4,13 +4,12 @@ import cards.AbstractCard;
 import core.*;
 import actions.common.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Objects;
 
 /******************************************************************************
  *  当前的dungeon（游戏场景），叫做Exordium。
- *
- *
  ******************************************************************************/
-
 public class Exordium extends AbstractDungeon {
 
     public static final String ID = "Exordium";
@@ -30,41 +29,55 @@ public class Exordium extends AbstractDungeon {
 
     public void init_dungeon() {
         System.out.println("Dungeon initialization starts.");
-        // 把第一个玩家作为现在场上的
+
         if (player_list.isEmpty()) {
             System.out.println("Running test: no players");
             return;
         }
 
-        onStagePlayer = (AbstractPlayer) player_list.get(0);
-        actionManager.addToTop(new GainBlockAction(player_list.get(1), 15));
-        //
-        onStagePlayer.drawPile = onStagePlayer.masterDeck.makeCopy();
-        onStagePlayer.drawPile.shuffle();
-        player_list.get(1).drawPile = player_list.get(1).masterDeck.makeCopy();
-        player_list.get(1).drawPile.shuffle();
+        for (AbstractCreature c: getCreatures()) {
+            AbstractPlayer p;
+            if (c.isPlayer) {
+                p = (AbstractPlayer) c;
+                p.drawPile = p.masterDeck.makeCopy();
+                p.drawPile.shuffle();
+            }
+            c.atPreBattle(); // activate buffs and rings
+        }
 
-        System.out.println("Dungeon initialization complete. Draw pile size is "
-                + onStagePlayer.drawPile.size());
+        System.out.println("Dungeon initialization complete.");
     }
 
     public void start_turn() {
         System.out.println("Turn starts.");
-        // deal cards
+        // 获得回合玩家 或者切换回合玩家
+        if (onStagePlayer == null) {
+            for (Iterator<AbstractCreature> iterator = getCreatures().iterator(); iterator.hasNext();) {
+                AbstractCreature p = iterator.next();
+                if (p.isPlayer) {
+                    onStagePlayer = (AbstractPlayer) p;
+                    break;
+                }
+            }
+            if (onStagePlayer == null) {
+                System.out.println("WARNING: START TURN FAILS TO GET PLAYER on initialization.");
+            }
+        } else {
+            for (Iterator<AbstractCreature> iterator = Objects.requireNonNull(getEnemies()).iterator(); iterator.hasNext();) {
+                AbstractCreature p = iterator.next();
+                if (p.isPlayer) {
+                    onStagePlayer = (AbstractPlayer) p;
+                    break;
+                }
+            }
+            if (onStagePlayer == null) {
+                System.out.println("WARNING: START TURN FAILS TO GET PLAYER FROM getEnemies().");
+            }
+        }
+        System.out.println("Getting player success: " + onStagePlayer.name);
         actionManager.startTurn();
-        actionManager.addToTop(new DrawCardAction(onStagePlayer, onStagePlayer.drawNumber, false));
-
-        // recharge energy
-        onStagePlayer.energy = 0;
-        actionManager.addToTop(new GainEnergyAction(onStagePlayer.energyCap));
-
-        // if?
-        onStagePlayer.loseBlock();
-
-        // activate buffs and rings
-        onStagePlayer.atTurnStart();
-
-        actionManager.emptyQueue();
+        onStagePlayer.startTurn();
+        actionManager.emptyQueue(); // 确保队列已空
         System.out.println("Turn start complete.");
     }
 
@@ -78,12 +91,8 @@ public class Exordium extends AbstractDungeon {
     public void end_turn() {
         System.out.println("Turn ends.");
         actionManager.endTurn();
-        // discard all cards
-        actionManager.addToTop(new DiscardAtEndOfTurnAction());
-        actionManager.emptyQueue();
-
-        // shift player
-        onStagePlayer = (AbstractPlayer)getEnemies().get(getEnemies().size()-1);
+        onStagePlayer.endTurn();
+        actionManager.emptyQueue(); // 确保队列已空
         System.out.println("Turn end complete.");
     }
 

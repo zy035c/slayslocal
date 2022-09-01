@@ -3,7 +3,7 @@ import dungeons.AbstractDungeon;
 import java.util.ArrayList;
 
 /******************************************************************************
- *  有一个类似于queue的结构，public ArrayList<AbstractGameAction> actions
+ *  有一个类似于queue的结构 ArrayList<AbstractGameAction> actions
  *  GameActionManager会从top往bottom逐个执行GameAction.
  *  phase表示动画是正在执行还是执行完毕。在动画正在执行的时候前端不可交互。
  *  例如卡打出的特效执行完之前，暂时不能打出第二张牌。特效的执行也不能重叠发生，

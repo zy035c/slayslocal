@@ -13,15 +13,15 @@ import static localization.CardStrings.getCardStrings;
 
 public class Apotheosis extends AbstractCard {
 
-    public static final String ID = "Apotheosis";
+    public static final String ID = "cards.colorless.Apotheosis";
     public static final String NAME = "Apotheosis";
     private static final CardStrings cardStrings = getCardStrings("Apotheosis");
-    public static final String DESCRIPTION = "Upgrade ALL of your cards for the rest of combat.\nExhaust.";
+    public static final String DESCRIPTION = "Upgrade ALL of your cards for the rest of combat." +
+            "\nExhaust.";
     public static final String IMG_PATH = "";
 
     private static final int COST = 2;
-    private static final int ATTACK_DMG = 0;
-    private static final int UPGRADE_PLUS_DMG = 0;
+
     DamageInfo.DamageType damageTypeForTurn;
 
     public Apotheosis() {
@@ -32,8 +32,8 @@ public class Apotheosis extends AbstractCard {
         this.exhaust = true;
     }
 
-    public void use(AbstractPlayer p, AbstractCreature m) {
-        calculateMagicNumber();
+    public void use(AbstractPlayer player, AbstractCreature m) {
+        calculateMagicNumber(player);
         AbstractDungeon.actionManager.addToTop((AbstractGameAction) new ApotheosisAction());
     }
 
