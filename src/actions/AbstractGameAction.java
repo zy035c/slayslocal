@@ -10,6 +10,21 @@ import core.AbstractCreature;
  *  应该有一个during参数来决定动画执行时长。（暂无
  ******************************************************************************/
 
+/******************************************************************************
+ *  @author  Ziyi Chen
+ *  @version  1.0
+ *  @since 2022-10-01
+ *
+ *  Abstract parent classes of all GameAction classes. All GameAction classes
+ *  must extend from this class and impl update().
+ *
+ *  GameAction is an abstraction of all kinds of events that happen during a
+ *  game. These events are put into a data structure, GameActionManager, where
+ *  they execute one by one. GameAction should wait for previous animation, and
+ *  will not execute before that animation terminates. 
+ *  @param during is the time length of the animation, and is not impl yet. 
+ ******************************************************************************/
+
 public abstract class AbstractGameAction {
 
     public AbstractCreature target;
