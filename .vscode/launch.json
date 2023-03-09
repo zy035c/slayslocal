@@ -1,0 +1,119 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "DarkSlay",
+            "request": "launch",
+            "mainClass": "DarkSlay",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "AnotherBorderTest",
+            "request": "launch",
+            "mainClass": "referenceExamples.AnotherBorderTest",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "BoxAlignmentDemo",
+            "request": "launch",
+            "mainClass": "referenceExamples.BoxAlignmentDemo",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "InfoBox",
+            "request": "launch",
+            "mainClass": "referenceExamples.InfoBox",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "JToolTipEventTextArea",
+            "request": "launch",
+            "mainClass": "referenceExamples.JToolTipEventTextArea",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "LayeredPaneMain",
+            "request": "launch",
+            "mainClass": "referenceExamples.LayeredPaneMain",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "SimplePaintSurface",
+            "request": "launch",
+            "mainClass": "referenceExamples.SimplePaintSurface",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "Swing",
+            "request": "launch",
+            "mainClass": "referenceExamples.Swing",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "ThreadStopTest",
+            "request": "launch",
+            "mainClass": "referenceExamples.ThreadStopTest",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "ToolTipExamp",
+            "request": "launch",
+            "mainClass": "referenceExamples.ToolTipExamp",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "BuffGUI",
+            "request": "launch",
+            "mainClass": "ui.BuffGUI",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "CardPane",
+            "request": "launch",
+            "mainClass": "ui.CardPane",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "CreatureGUI",
+            "request": "launch",
+            "mainClass": "ui.CreatureGUI",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "ui.GUI",
+            "projectName": "slayslocal_93edce7c"
+        },
+        {
+            "type": "java",
+            "name": "TestCardPane",
+            "request": "launch",
+            "mainClass": "ui.test.TestCardPane",
+            "projectName": "slayslocal_93edce7c"
+        }
+    ]
+}

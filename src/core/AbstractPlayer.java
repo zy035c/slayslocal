@@ -15,7 +15,7 @@ import dungeons.AbstractDungeon;
 import rings.AbstractRing;
 
 /******************************************************************************
- *  所有游戏玩家角色class的抽象父类，必须extend这个类。
+ *  parent class of all player classes
  *
  *
  ******************************************************************************/

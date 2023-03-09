@@ -91,7 +91,7 @@ public class CreatureGUI {
 
         // 角色图片
         // init creature image
-        image = new JLabel("等待图片...");
+        image = new JLabel("illust...");
         image.setOpaque(true);
         image.setBackground(GameColors.cguiPlaceholder);
         image.setBounds(

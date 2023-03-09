@@ -30,7 +30,8 @@ public class HeartIcon implements Icon {
                 x - width/12,
                 y,
                 width/2 + width/6,
-                height/2);
+                height/2
+        );
         g.fillOval(
                 x + width/2 - width/12,
                 y,

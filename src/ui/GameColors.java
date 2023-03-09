@@ -11,9 +11,9 @@ public class GameColors {
         String blue = Integer.toHexString(color.getBlue());
 
         return "#" +
-                (red.length() == 1 ? "0" + red : red) +
-                (green.length() == 1 ? "0" + green : green) +
-                (blue.length() == 1 ? "0" + blue : blue);
+                (red.length() == 1? "0" + red : red) +
+                (green.length() == 1? "0" + green : green) +
+                (blue.length() == 1? "0" + blue : blue);
     }
 
     public static Color card_common = new Color(187, 181, 184, 213); // card title background

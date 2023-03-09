@@ -84,7 +84,7 @@ public abstract class AbstractCreature {
         }
     };
 
-    // 格挡被减少的方法
+    // the way to decrement block
     protected int decrementBlock(DamageInfo info, int damageAmount) {
         if (info.type != DamageInfo.DamageType.HP_LOSS && this.block > 0) {
             // CardCrawlGame call upper abstract class to show effect
