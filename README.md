@@ -3,7 +3,7 @@
 ? Not sure if it will be rendered by react-markdown
 
 ## How to run it?
-Run main method in src/DarkSlay.java
+Run main method in src/DarkSlay.java\n
 No dependency required. All code built with native JRE.
 
 ## I want to try it out immediate.
