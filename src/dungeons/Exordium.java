@@ -44,7 +44,6 @@ public class Exordium extends AbstractDungeon {
             }
             c.atPreBattle(); // activate buffs and rings
         }
-
         System.out.println("Dungeon initialization complete.");
     }
 

@@ -115,11 +115,9 @@ public class CardPaneListener extends MouseAdapter {
             scene.updateDungeonDisplay();
             scene.updateCardDisplay(true, true);
 
-            return;
         } else {
             System.out.println("-> Cannot play " + pane.card.NAME + ".");
             pane.moveBack();
-            return;
         }
     }
 }

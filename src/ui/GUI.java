@@ -326,7 +326,7 @@ public class GUI {
     }
 
     // 没有烧牌堆更新。在外部更新？
-    // @Test 测试用
+    // @Test for test
     public static void main(String[] args) {
         CustomFrame frame = new CustomFrame();
         GUI gui = new GUI(frame);

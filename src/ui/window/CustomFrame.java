@@ -13,7 +13,7 @@ public class CustomFrame extends JFrame {
     public static final int FRAME_HEIGHT = 800;
     public JLayeredPane layeredPane;
     public CustomFrame() {
-        this.setTitle("Dark Slay™ Local Demo");
+        this.setTitle("Dark Slay Java Demo");
         Dimension size = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
 
         this.setSize(size);

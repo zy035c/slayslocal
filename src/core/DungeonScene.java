@@ -38,8 +38,8 @@ public class DungeonScene implements Runnable {
     private static final int MAIN_HEIGHT = calcY(200);
 
     /******************************************************************************
-     * 游戏主线程
-     * init方法：仅在battle开始时call一次
+     * main thread of the game
+     * init: only called once when the game is started
      ******************************************************************************/
     public void init() {
         initCreatureUI();

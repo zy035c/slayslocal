@@ -23,7 +23,7 @@ public class EndTurnListener implements ActionListener {
             @Override
             public void run() {
                 scene.endTurn();
-                // stop(); // 会自动销毁/终止线程？
+                // stop(); // automatically destroy thread?
             }
         };
         endBtnThread.start();

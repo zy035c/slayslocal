@@ -13,8 +13,8 @@ public class DarkSlay {
     public static void main (String[] args) {
 
         ArrayList<AbstractCreature> p_list = new ArrayList<>();
-        TestPlayer1 p1 = new TestPlayer1("测试1");
-        TestPlayer2 p2 = new TestPlayer2("测试2");
+        TestPlayer1 p1 = new TestPlayer1("test_player_1");
+        TestPlayer2 p2 = new TestPlayer2("test_player_2");
         p_list.add(p1);
         p_list.add(p2);
         Exordium dungeon = new Exordium(p_list);
